@@ -13,6 +13,7 @@ type Server struct {
 	Sitemap *Sitemap
 
 	StaticDir string
+	ClientDir string
 }
 
 func New(pages page.Store) *Server {
@@ -21,6 +22,7 @@ func New(pages page.Store) *Server {
 		Pages:     pages,
 		Sitemap:   NewSitemap(pages),
 		StaticDir: "static",
+		ClientDir: "client/client",
 	}
 }
 

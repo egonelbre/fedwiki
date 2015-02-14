@@ -3,7 +3,7 @@
 {{else if (eq .type "html")}}{{template "html.html" . }}
 {{else if (eq .type "factory")}}{{template "factory.html" . }}
 {{else}}
-<div class="unknown-elem">
+<div class="unknown-element">
 	<h4>{{.type}}</h4>
 	<dl>{{range $key, $elem := .}}<dt>{{$key}}</dt><dd>{{$elem}}</dd>{{ end }}</dl>
 </div>

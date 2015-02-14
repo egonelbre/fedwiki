@@ -9,14 +9,20 @@ import (
 	"strings"
 )
 
-const StaticRoute = "/static/"
+const (
+	StaticRoute = "/static/"
+	ClientRoute = "/client/"
+)
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		s.serveClient(rw, r)
+		s.serveIndex(rw, r)
 		return
 	} else if strings.HasPrefix(r.URL.Path, StaticRoute) {
 		s.serveStatic(rw, r)
+		return
+	} else if strings.HasPrefix(r.URL.Path, ClientRoute) {
+		s.serveClient(rw, r)
 		return
 	}
 
@@ -76,5 +82,10 @@ func (s *Server) serveStatic(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) serveClient(rw http.ResponseWriter, r *http.Request) {
+	upath := filepath.Join(s.ClientDir, r.URL.Path[len(ClientRoute):])
+	http.ServeFile(rw, r, path.Clean(upath))
+}
+
+func (s *Server) serveIndex(rw http.ResponseWriter, r *http.Request) {
 	s.RenderTemplate(rw, "client.html", s.Title)
 }

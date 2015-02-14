@@ -4,7 +4,42 @@
 	<meta charset="utf-8">
 	{{template "head.html"}}
 	<title>{{.}}</title>
+    <link href='/static/favicon.png' rel='icon' type='image/png'>
+    <link href='/client/style.css' rel='stylesheet' type='text/css'>
+    <script src='/client/js/jquery-1.9.1.min.js' type='text/javascript'></script>
+    <script src='/client/js/jquery-migrate-1.1.1.min.js' type='text/javascript'></script>
+    <script src='/client/js/jquery-ui-1.10.1.custom.min.js' type='text/javascript'></script>
+    <link href='/client/js/jquery-ui-1.10.1.custom.min.css' rel='stylesheet' type='text/css'>
+    <script src='/client/js/modernizr.custom.63710.js' type='text/javascript'></script>
+    <script src='/client/js/underscore-min.js' type='text/javascript'></script>
+    <script src='/client/client.js' type='text/javascript'></script>
+    <script>
+      Modernizr.load([{test: Modernizr.cors, nope: '/js/jquery.ie.cors.js'}]);
+    </script>	
 </head>
 <body>
+	<section class='main'>
+		<div class='page' id='welcome-visitors'></div>
+	</section>
+	<footer class='login'>
+		<form action='/login' method='POST'>
+			OpenID:
+			<input name='identifier' type='text'>
+			<input type='submit' value='Login'>
+			or use:
+			<span class='provider'>
+				<input data-provider='https://www.google.com/accounts/o8/id' title='google' type='button' value='G'>
+				<input data-provider='https://me.yahoo.com' title='yahoo' type='button' value='Y'>
+				<input data-provider='https://www.aol.com' title='aol' type='button' value='A'>
+				<input data-provider='http://www.livejournal.com/openid/server.bml' title='livejournal' type='button' value='L'>
+			</span>
+		</form>
+		<span class='searchbox'>
+			Search:
+			<input class='search' name='search' type='text'>
+			<span class='pages'></span>
+		</span>
+		<span class='neighborhood'></span>
+	</footer>
 </body>
 </html>
