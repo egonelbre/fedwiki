@@ -40,11 +40,18 @@ var (
 func (s *Server) RenderHTML(w io.Writer, data interface{}) {
 	t, err := template.New("").Funcs(helpers).ParseGlob(filepath.Join("views", "*.html"))
 	if err != nil {
-		fmt.Fprintf(w, "<h1>Error</h1><p>%v</p>", err)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	if _, ok := data.(ErrorResponse); ok {
+		if err := t.ExecuteTemplate(w, "error.html", data); err != nil {
+			fmt.Fprintf(w, err.Error())
+		}
 		return
 	}
 
 	if err := t.ExecuteTemplate(w, "index.html", data); err != nil {
-		fmt.Fprintf(w, "<h1>Error</h1><p>%v</p>", err)
+		fmt.Fprintf(w, err.Error())
 	}
 }
