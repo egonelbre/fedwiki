@@ -14,16 +14,25 @@ import (
 var (
 	rxInternal = regexp.MustCompile(`\[\[([^\]]+)\]\]`)
 	rxExternal = regexp.MustCompile(`\[((?:http|https|ftp):.*?) (.*?)\]`)
+)
 
+func resolve(s string) template.HTML {
+	s = rxInternal.ReplaceAllStringFunc(s, func(s string) string {
+		s = strings.Trim(s, "[]")
+		return fmt.Sprintf(`<a href="%s">%s</a>`, page.Slugify(s), s)
+	})
+	s = rxExternal.ReplaceAllString(s, `<a href="$1">$2</a>`)
+	return template.HTML(s)
+}
+
+var (
 	helpers = template.FuncMap{
 		"resolve": func(s string) template.HTML {
 			s = template.HTMLEscapeString(s)
-			s = rxInternal.ReplaceAllStringFunc(s, func(s string) string {
-				s = strings.Trim(s, "[]")
-				return fmt.Sprintf(`<a href="%s">%s</a>`, page.Slugify(s), s)
-			})
-			s = rxExternal.ReplaceAllString(s, `<a href="$1">$2</a>`)
-			return template.HTML(s)
+			return resolve(s)
+		},
+		"html": func(s string) template.HTML {
+			return resolve(s)
 		},
 	}
 )

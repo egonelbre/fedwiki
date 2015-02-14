@@ -7,14 +7,14 @@ import (
 
 type Action map[string]interface{}
 
-func (action Action) Val(key string) string {
+func (action Action) Str(key string) string {
 	if s, ok := action[key].(string); ok {
 		return s
 	}
 	return ""
 }
 
-func (action Action) Type() string { return action.Val("type") }
+func (action Action) Type() string { return action.Str("type") }
 
 func (action Action) Date() (t time.Time, err error) {
 	val, ok := action["date"]
@@ -35,16 +35,27 @@ func (action Action) Date() (t time.Time, err error) {
 }
 
 var actionfns = map[string]func(p *Page, a Action) error{
-	"edit": func(p *Page, a Action) error {
-		return nil
+	"add": func(p *Page, action Action) error {
+		props := action["item"]
+		item, ok := props.(Item)
+		if !ok {
+			return fmt.Errorf("invalid item")
+		}
+		return p.Story.InsertAfter(action.Str("after"), item)
 	},
-	"add": func(p *Page, a Action) error {
-		return nil
+	"edit": func(p *Page, action Action) error {
+		props := action["item"]
+		item, ok := props.(Item)
+		if !ok {
+			return fmt.Errorf("invalid item")
+		}
+		return p.Story.SetById(action.Str("id"), item)
 	},
-	"remove": func(p *Page, a Action) error {
-		return nil
+	"remove": func(p *Page, action Action) error {
+		_, err := p.Story.RemoveById(action.Str("id"))
+		return err
 	},
-	"move": func(p *Page, a Action) error {
-		return nil
+	"move": func(p *Page, action Action) error {
+		return p.Story.Move(action.Str("id"), action.Str("after"))
 	},
 }
