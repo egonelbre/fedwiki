@@ -1,7 +1,5 @@
 package page
 
-type Story []Item
-
 type Item map[string]interface{}
 
 func (item Item) Val(key string) string {

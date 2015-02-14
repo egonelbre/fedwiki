@@ -45,7 +45,9 @@ func validate(spec map[string]Prop, values map[string]interface{}) error {
 
 		actual := reflect.TypeOf(v).Kind()
 		if prop.Kind != actual {
-			errs = append(errs, fmt.Errorf(`expected "%v" to be "%v", but was "%v"`, key, expected, actual))
+			errs = append(errs, fmt.Errorf(`expected "%v" to be "%v", but was "%v"`, key, prop.Kind, actual))
 		}
 	}
+
+	return errs
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mime"
 	"net/http"
+	"path"
 )
 
 type ContentFunc func(rw http.ResponseWriter, r *http.Request) (response interface{}, code int)
@@ -25,6 +26,19 @@ func HandleAcceptHeader(fn ContentFunc) http.HandlerFunc {
 			}
 		}
 
+		// back-comp with older clients
+		if responseType == "" {
+			ext := path.Ext(r.URL.Path)
+			switch ext {
+			case ".json":
+				r.URL.Path = r.URL.Path[:len(r.URL.Path)-len(ext)]
+				responseType = "application/json"
+			case ".html":
+				r.URL.Path = r.URL.Path[:len(r.URL.Path)-len(ext)]
+				responseType = "text/html"
+			}
+		}
+
 		response, code := fn(rw, r)
 
 		switch responseType {
@@ -38,31 +52,9 @@ func HandleAcceptHeader(fn ContentFunc) http.HandlerFunc {
 		default:
 			rw.Header().Set("Content-Type", "text/html")
 			rw.WriteHeader(code)
-			fmt.Fprintf(response)
+			fmt.Fprintf(rw, "%#v\n", response)
 		}
 	}
-}
-
-type ErrorResponse struct {
-	Status string `json:"status"`
-	Code   int    `json:"code"`
-	Detail string `json:"detail"`
-}
-
-func Error(code int, detail string) (r interface{}, rcode int) {
-	return ErrorResponse{
-		Status: http.StatusText(code),
-		Code:   code,
-		Detail: detail,
-	}, code
-}
-
-func Errorf(code int, format string, args ...interface{}) (r interface{}, rcode int) {
-	return ErrorResponse{
-		Status: http.StatusText(code),
-		Code:   code,
-		Detail: fmt.Sprintf(format, args...),
-	}, code
 }
 
 func Accepts(r *http.Request, mimetype string) bool {

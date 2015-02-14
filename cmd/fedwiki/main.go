@@ -4,8 +4,12 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/egonelbre/wiki-go-server/page/folderstore"
+	"github.com/egonelbre/wiki-go-server/server"
 )
 
 type Dirs struct {
@@ -53,12 +57,12 @@ func main() {
 	datadir := *dirdata
 	if !filepath.IsAbs(datadir) {
 		var err error
-		datadir, err = filepath.Abs(*datadir)
+		datadir, err = filepath.Abs(datadir)
 		check(err)
 	}
 
 	dir := Dirs{
-		Content:  datadir,
+		Data:     datadir,
 		Packages: filepath.Join(datadir, *dirpackages),
 		Client:   filepath.Join(datadir, *dirclient),
 		Pages:    filepath.Join(datadir, *dirpages),
@@ -71,6 +75,11 @@ func main() {
 	if _, err := os.Stat(dir.Pages); os.IsNotExist(err) {
 		check(copyfiles(dir.Default, dir.Data))
 	}
+
+	store := folderstore.New(dir.Pages)
+	server := server.New(store)
+	http.Handle("/", server)
+	check(http.ListenAndServe(*addr, nil))
 }
 
 func copyfiles(src, dst string) error {

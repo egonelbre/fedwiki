@@ -4,21 +4,21 @@ import "reflect"
 
 var (
 	Actions = map[string]Action{
-		"add": spec{
+		"add": Action{
 			"id":    Prop{reflect.String, false},
 			"item":  Prop{reflect.Interface, false},
 			"after": Prop{reflect.String, true},
 		},
-		"edit": spec{
+		"edit": Action{
 			"id":   Prop{reflect.String, false},
 			"item": Prop{reflect.Interface, false},
 		},
-		"move": spec{
+		"move": Action{
 			"id":    Prop{reflect.String, false},
 			"after": Prop{reflect.String, true},
 			"order": Prop{reflect.Slice, false},
 		},
-		"remove": spec{
+		"remove": Action{
 			"id": Prop{reflect.String, false},
 		},
 	}

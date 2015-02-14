@@ -16,7 +16,7 @@ func New(fallback page.Store, order ...page.Store) *Store {
 	return &Store{fallback, order}
 }
 
-func (store *Store) Exists(slug Slug) bool {
+func (store *Store) Exists(slug page.Slug) bool {
 	for _, store := range store.Order {
 		if store.Exists(slug) {
 			return true
@@ -25,7 +25,7 @@ func (store *Store) Exists(slug Slug) bool {
 	return false
 }
 
-func (store *Store) Load(slug Slug) (*page.Page, error) {
+func (store *Store) Load(slug page.Slug) (*page.Page, error) {
 	for _, store := range store.Order {
 		if store.Exists(slug) {
 			return store.Load(slug)
@@ -35,7 +35,7 @@ func (store *Store) Load(slug Slug) (*page.Page, error) {
 	return store.Fallback.Load(slug)
 }
 
-func (store *Store) Save(slug Slug, page *page.Page) error {
+func (store *Store) Save(slug page.Slug, page *page.Page) error {
 	for _, store := range store.Order {
 		if store.Exists(slug) {
 			return store.Save(slug, page)
@@ -46,8 +46,8 @@ func (store *Store) Save(slug Slug, page *page.Page) error {
 }
 
 // Discards any errors that happen in sub-stores
-func (store *Store) List() ([]page.Header, error) {
-	headers := []page.Header{}
+func (store *Store) List() ([]*page.Header, error) {
+	headers := []*page.Header{}
 	for _, store := range store.Order {
 		sub, _ := store.List()
 		headers = append(headers, sub)
