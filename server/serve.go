@@ -5,14 +5,22 @@ import (
 	"fmt"
 	"net/http"
 	"path"
-
-	"github.com/egonelbre/wiki-go-server/page"
-	"github.com/egonelbre/wiki-go-server/page/pageutil"
+	"path/filepath"
+	"strings"
 )
 
-func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	responseType := ""
+const StaticRoute = "/static/"
 
+func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/" {
+		s.serveClient(rw, r)
+		return
+	} else if strings.HasPrefix(r.URL.Path, StaticRoute) {
+		s.serveStatic(rw, r)
+		return
+	}
+
+	responseType := ""
 	if r.Header.Get("Accept") != "" {
 		spec := ParseAccept(r)
 		switch {
@@ -39,7 +47,13 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	response, code := s.handlePage(rw, r)
+	var response interface{}
+	var code int
+	if strings.HasPrefix(r.URL.Path, "/system/") {
+		response, code = s.handleSystem(rw, r)
+	} else {
+		response, code = s.handlePage(rw, r)
+	}
 
 	switch responseType {
 	case "application/json":
@@ -56,79 +70,11 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) handlePage(rw http.ResponseWriter, r *http.Request) (response interface{}, code int) {
-	slug := page.Slug(r.URL.Path)
-	if err := page.ValidateSlug(slug); err != nil {
-		return Error(http.StatusBadRequest, err.Error())
-	}
+func (s *Server) serveStatic(rw http.ResponseWriter, r *http.Request) {
+	upath := filepath.Join(s.StaticDir, r.URL.Path[len(StaticRoute):])
+	http.ServeFile(rw, r, path.Clean(upath))
+}
 
-	if r.Method != "GET" && !s.IsAuthorized(r) {
-		return Error(http.StatusUnauthorized, "Unauthorized request.")
-	}
-
-	switch r.Method {
-	case "GET":
-		p, err := s.Pages.Load(slug)
-		if err != nil {
-			if err == page.ErrNotExist {
-				return Errorf(http.StatusNotFound, `Page "%s" does not exist.`, slug)
-			}
-			return Error(http.StatusInternalServerError, err.Error())
-		}
-		p.Slug = slug
-		return p, http.StatusOK
-	case "PUT":
-		var p *page.Page
-		var err error
-
-		switch r.Header.Get("Content-Type") {
-		case "":
-			fallthrough
-		case "application/json":
-			p, err = pageutil.Read(r.Body)
-			r.Body.Close()
-			if err != nil {
-				return Error(http.StatusBadRequest, err.Error())
-			}
-		default:
-			return Errorf(http.StatusBadRequest, `Invalid request Content-Type "%s".`, r.Header.Get("Content-Type"))
-		}
-
-		err = s.Pages.Save(slug, p)
-		if err != nil {
-			return Error(http.StatusInternalServerError, err.Error())
-		}
-		return nil, http.StatusOK
-	case "PATCH":
-		var action page.Action
-		var err error
-
-		switch r.Header.Get("Content-Type") {
-		case "":
-			fallthrough
-		case "application/json":
-			action, err = pageutil.ReadAction(r.Body)
-			r.Body.Close()
-			if err != nil {
-				return Error(http.StatusBadRequest, err.Error())
-			}
-		default:
-			return Errorf(http.StatusBadRequest, `Invalid request Content-Type "%s".`, r.Header.Get("Content-Type"))
-		}
-
-		p, err := s.Pages.Load(slug)
-		if err != nil {
-			if err == page.ErrNotExist {
-				return Errorf(http.StatusNotFound, `Page "%s" does not exist.`, slug)
-			}
-			return Error(http.StatusInternalServerError, err.Error())
-		}
-
-		if err := p.Apply(action); err != nil {
-			return Error(http.StatusInternalServerError, err.Error())
-		}
-		return nil, http.StatusOK
-	default:
-		return Errorf(http.StatusNotAcceptable, `Unknown request Method "%s".`, r.Method)
-	}
+func (s *Server) serveClient(rw http.ResponseWriter, r *http.Request) {
+	s.RenderTemplate(rw, "client.html", s.Title)
 }

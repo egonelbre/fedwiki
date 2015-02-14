@@ -37,21 +37,22 @@ var (
 	}
 )
 
-func (s *Server) RenderHTML(w io.Writer, data interface{}) {
+func (s *Server) RenderTemplate(w io.Writer, tname string, data interface{}) {
 	t, err := template.New("").Funcs(helpers).ParseGlob(filepath.Join("views", "*.html"))
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	if _, ok := data.(ErrorResponse); ok {
-		if err := t.ExecuteTemplate(w, "error.html", data); err != nil {
-			fmt.Fprintf(w, err.Error())
-		}
-		return
-	}
-
-	if err := t.ExecuteTemplate(w, "index.html", data); err != nil {
+	if err := t.ExecuteTemplate(w, tname, data); err != nil {
 		fmt.Fprintf(w, err.Error())
 	}
+}
+
+func (s *Server) RenderHTML(w io.Writer, data interface{}) {
+	if _, ok := data.(ErrorResponse); ok {
+		s.RenderTemplate(w, "error.html", data)
+		return
+	}
+	s.RenderTemplate(w, "static.html", data)
 }

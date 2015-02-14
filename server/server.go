@@ -7,11 +7,21 @@ import (
 )
 
 type Server struct {
-	Pages page.Store
+	Title string
+
+	Pages   page.Store
+	Sitemap *Sitemap
+
+	StaticDir string
 }
 
 func New(pages page.Store) *Server {
-	return &Server{pages}
+	return &Server{
+		Title:     "",
+		Pages:     pages,
+		Sitemap:   NewSitemap(pages),
+		StaticDir: "static",
+	}
 }
 
 func (s *Server) IsAuthorized(r *http.Request) bool {
