@@ -18,7 +18,7 @@ func New(dir string) *Store {
 }
 
 func (store *Store) path(slug page.Slug) string {
-	filename := filepath.FromSlash(string(slug)) + ".json"
+	filename := filepath.FromSlash(string(slug))
 	return filepath.Join(store.Dir, filename)
 }
 
@@ -45,17 +45,15 @@ func (store *Store) List() ([]*page.Header, error) {
 
 	headers := []*page.Header{}
 	for _, info := range list {
-		if filepath.Ext(info.Name()) == ".json" {
-			filename := filepath.Join(store.Dir, info.Name())
+		filename := filepath.Join(store.Dir, info.Name())
 
-			header, err := pageutil.LoadHeader(filename)
-			err = pageutil.ConvertOSError(err)
-			if err != nil {
-				return nil, err
-			}
-
-			headers = append(headers, header)
+		header, err := pageutil.LoadHeader(filename)
+		err = pageutil.ConvertOSError(err)
+		if err != nil {
+			return nil, err
 		}
+
+		headers = append(headers, header)
 	}
 	return headers, nil
 }

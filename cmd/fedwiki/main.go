@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -23,7 +24,7 @@ type Dirs struct {
 }
 
 var (
-	addr = flag.String("listen", "localhost:8080", "HTTP listening address")
+	addr = flag.String("listen", "", "HTTP listening address")
 
 	dirdefault  = flag.String("default", "default-data", "directory for default-data")
 	dirdata     = flag.String("data", "data", "directory for storing all data")
@@ -47,12 +48,20 @@ func absolute(s string) string {
 
 func check(err error) {
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
 func main() {
 	flag.Parse()
+
+	port := os.Getenv("PORT")
+	if port != "" {
+		*addr = "localhost:" + port
+	}
+	if *addr == "" {
+		*addr = ":8080"
+	}
 
 	datadir := *dirdata
 	if !filepath.IsAbs(datadir) {
@@ -61,7 +70,15 @@ func main() {
 		check(err)
 	}
 
+	defdir := *dirdefault
+	if !filepath.IsAbs(defdir) {
+		var err error
+		defdir, err = filepath.Abs(defdir)
+		check(err)
+	}
+
 	dir := Dirs{
+		Default:  defdir,
 		Data:     datadir,
 		Packages: filepath.Join(datadir, *dirpackages),
 		Client:   filepath.Join(datadir, *dirclient),
@@ -79,6 +96,8 @@ func main() {
 	store := folderstore.New(dir.Pages)
 	server := server.New(store)
 	http.Handle("/", server)
+
+	fmt.Printf("Listening on %v...\n", *addr)
 	check(http.ListenAndServe(*addr, nil))
 }
 
@@ -88,9 +107,13 @@ func copyfiles(src, dst string) error {
 			if err != nil {
 				return err
 			}
+			path, err = filepath.Rel(src, path)
+			if err != nil {
+				return err
+			}
 
 			if info.IsDir() {
-				return os.Mkdir(filepath.Join(dst, path), info.Mode())
+				return os.MkdirAll(filepath.Join(dst, path), info.Mode())
 			}
 
 			data, err := ioutil.ReadFile(filepath.Join(src, path))

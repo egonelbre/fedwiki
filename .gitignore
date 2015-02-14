@@ -19,6 +19,10 @@ _cgo_export.*
 
 _testmain.go
 
+*~
 *.exe
 *.test
 *.prof
+
+cmd/fedwiki/default-data/**
+cmd/fedwiki/data/**

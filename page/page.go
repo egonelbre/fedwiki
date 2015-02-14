@@ -10,7 +10,7 @@ type Header struct {
 }
 
 type Page struct {
-	Header  Header
+	Header
 	Story   Story   `json:"story"`
 	Journal Journal `json:"journal"`
 }
@@ -33,4 +33,19 @@ func (page *Page) Apply(action Action) error {
 		page.Header.Date = t
 	}
 	return nil
+}
+
+// if no date is found then it will use the current time!
+func (page *Page) LastModified() time.Time {
+	if !page.Date.IsZero() {
+		return page.Date
+	}
+
+	for _, action := range page.Journal {
+		if t, err := action.Date(); err == nil && !t.IsZero() {
+			return t
+		}
+	}
+
+	return time.Now()
 }

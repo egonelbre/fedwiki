@@ -1,0 +1,9 @@
+{{     if (eq .type "paragraph")}}{{template "paragraph.html" . }}
+{{else if (eq .type "reference")}}{{template "reference.html" . }}
+{{else if (eq .type "factory")}}{{template "factory.html" . }}
+{{else}}
+<div class="unknown-elem">
+	<h4>{{.type}}</h4>
+	<dl>{{range $key, $elem := .}}<dt>{{$key}}</dt><dd>{{$elem}}</dd>{{ end }}</dl>
+</div>
+{{ end }}

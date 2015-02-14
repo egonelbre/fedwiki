@@ -12,5 +12,11 @@ var (
 			"id":   Prop{reflect.String, false},
 			"text": Prop{reflect.String, false},
 		},
+		"reference": Item{
+			"id":    Prop{reflect.String, false},
+			"site":  Prop{reflect.String, false},
+			"title": Prop{reflect.String, true},
+			"text":  Prop{reflect.String, true},
+		},
 	}
 )

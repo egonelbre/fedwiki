@@ -3,6 +3,7 @@ package page
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 type Slug string
@@ -14,6 +15,27 @@ func ValidateSlug(slug Slug) error {
 		return fmt.Errorf(`slug must match /%s/`, rxSlug)
 	}
 	return nil
+}
+
+var (
+	rxName     = regexp.MustCompile(`([A-Z][a-z]+)`)
+	rxNumber   = regexp.MustCompile(`([0-9]+)`)
+	rxToDash   = regexp.MustCompile(`[\-\s]+`)
+	rxSlashes  = regexp.MustCompile(`\s*(\/\s*)+`)
+	rxTrailing = regexp.MustCompile(`[\/ ]+$`)
+	rxRemove   = regexp.MustCompile(`[^a-zA-Z0-9\-\/_ ]`)
+)
+
+func Slugify(s string) Slug {
+	s = rxName.ReplaceAllString(s, " $1 ")
+	s = rxNumber.ReplaceAllString(s, " $1 ")
+	s = rxRemove.ReplaceAllString(s, "")
+	s = strings.TrimSpace(s)
+	s = rxSlashes.ReplaceAllString(s, "/")
+	s = rxTrailing.ReplaceAllString(s, "")
+	s = rxToDash.ReplaceAllString(s, "-")
+	s = strings.ToLower(s)
+	return Slug(s)
 }
 
 type Store interface {
