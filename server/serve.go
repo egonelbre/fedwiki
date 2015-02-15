@@ -41,16 +41,14 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// back-comp with older clients
-	if responseType == "" {
-		ext := path.Ext(r.URL.Path)
-		switch ext {
-		case ".json":
-			r.URL.Path = r.URL.Path[:len(r.URL.Path)-len(ext)]
-			responseType = "application/json"
-		case ".html":
-			r.URL.Path = r.URL.Path[:len(r.URL.Path)-len(ext)]
-			responseType = "text/html"
-		}
+	ext := path.Ext(r.URL.Path)
+	switch ext {
+	case ".json":
+		r.URL.Path = r.URL.Path[:len(r.URL.Path)-len(ext)]
+		responseType = "application/json"
+	case ".html":
+		r.URL.Path = r.URL.Path[:len(r.URL.Path)-len(ext)]
+		responseType = "text/html"
 	}
 
 	var response interface{}
