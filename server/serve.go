@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"path"
-	"path/filepath"
 	"strings"
 )
 
@@ -15,17 +14,6 @@ const (
 )
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		s.serveIndex(rw, r)
-		return
-	} else if strings.HasPrefix(r.URL.Path, StaticRoute) {
-		s.serveStatic(rw, r)
-		return
-	} else if strings.HasPrefix(r.URL.Path, ClientRoute) {
-		s.serveClient(rw, r)
-		return
-	}
-
 	responseType := ""
 	if r.Header.Get("Accept") != "" {
 		spec := ParseAccept(r)
@@ -72,18 +60,4 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(code)
 		s.RenderHTML(rw, response)
 	}
-}
-
-func (s *Server) serveStatic(rw http.ResponseWriter, r *http.Request) {
-	upath := filepath.Join(s.StaticDir, r.URL.Path[len(StaticRoute):])
-	http.ServeFile(rw, r, path.Clean(upath))
-}
-
-func (s *Server) serveClient(rw http.ResponseWriter, r *http.Request) {
-	upath := filepath.Join(s.ClientDir, r.URL.Path[len(ClientRoute):])
-	http.ServeFile(rw, r, path.Clean(upath))
-}
-
-func (s *Server) serveIndex(rw http.ResponseWriter, r *http.Request) {
-	s.RenderTemplate(rw, "client.html", s.Title)
 }

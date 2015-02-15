@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/egonelbre/wiki-go-server/page/folderstore"
 	"github.com/egonelbre/wiki-go-server/server"
@@ -95,10 +97,30 @@ func main() {
 
 	store := folderstore.New(dir.Pages)
 	server := server.New(store)
-	http.Handle("/", server)
 
-	fmt.Printf("Listening on %v...\n", *addr)
-	check(http.ListenAndServe(*addr, nil))
+	log.Printf("Listening on %v...\n", *addr)
+	check(http.ListenAndServe(*addr,
+		http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			log.Printf("REQ '%s' > '%s'\n", r.URL, r.URL.Path)
+			if strings.HasPrefix(r.URL.Path, "/client/") {
+				upath := filepath.Join("client", "client", r.URL.Path[len("/client"):])
+				fmt.Println(upath)
+				http.ServeFile(rw, r, path.Clean(upath))
+				return
+			}
+			if strings.HasPrefix(r.URL.Path, "/static/") {
+				upath := filepath.Join("static", r.URL.Path[len("/static"):])
+				fmt.Println(upath)
+				http.ServeFile(rw, r, path.Clean(upath))
+				return
+			}
+			if r.URL.Path == "" || r.URL.Path == "/" {
+				http.ServeFile(rw, r, "client.html")
+				return
+			}
+
+			server.ServeHTTP(rw, r)
+		})))
 }
 
 func copyfiles(src, dst string) error {

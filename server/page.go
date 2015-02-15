@@ -29,6 +29,8 @@ func (s *Server) handlePage(rw http.ResponseWriter, r *http.Request) (response i
 		p.Slug = slug
 		return p, http.StatusOK
 	case "PUT":
+		defer s.Sitemap.Update()
+
 		var p *page.Page
 		var err error
 
@@ -51,6 +53,8 @@ func (s *Server) handlePage(rw http.ResponseWriter, r *http.Request) (response i
 		}
 		return nil, http.StatusOK
 	case "PATCH":
+		defer s.Sitemap.Update()
+
 		var action page.Action
 		var err error
 

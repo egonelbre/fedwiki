@@ -7,22 +7,14 @@ import (
 )
 
 type Server struct {
-	Title string
-
 	Pages   page.Store
 	Sitemap *Sitemap
-
-	StaticDir string
-	ClientDir string
 }
 
 func New(pages page.Store) *Server {
 	return &Server{
-		Title:     "",
-		Pages:     pages,
-		Sitemap:   NewSitemap(pages),
-		StaticDir: "static",
-		ClientDir: "client/client",
+		Pages:   pages,
+		Sitemap: NewSitemap(pages),
 	}
 }
 
