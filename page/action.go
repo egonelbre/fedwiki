@@ -34,6 +34,7 @@ func (action Action) Date() (t time.Time, err error) {
 	return time.Unix(0, 0), fmt.Errorf("unknown date format")
 }
 
+//TODO: create, fork
 var actionfns = map[string]func(p *Page, a Action) error{
 	"add": func(p *Page, action Action) error {
 		props := action["item"]
