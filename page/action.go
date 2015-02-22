@@ -59,4 +59,10 @@ var actionfns = map[string]func(p *Page, a Action) error{
 	"move": func(p *Page, action Action) error {
 		return p.Story.Move(action.Str("id"), action.Str("after"))
 	},
+	"create": func(p *Page, action Action) error {
+		return nil
+	},
+	"fork": func(p *Page, action Action) error {
+		return nil
+	},
 }

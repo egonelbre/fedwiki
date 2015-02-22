@@ -33,12 +33,20 @@ func (sitemap *Sitemap) PageChanged(p *page.Page, err error) {
 }
 
 func (sitemap *Sitemap) Handle(rw http.ResponseWriter, r *http.Request) (response interface{}, code int, template string) {
-	if r.URL.Path != "/system/sitemap" {
-		return nil, http.StatusNotFound, ""
+	switch r.URL.Path {
+	case "/system/sitemap":
+		sitemap.mu.RLock()
+		defer sitemap.mu.RUnlock()
+		return sitemap.headers, http.StatusOK, "sitemap"
+	case "/system/slugs":
+		sitemap.mu.RLock()
+		defer sitemap.mu.RUnlock()
+		slugs := make([]page.Slug, 0, len(sitemap.headers))
+		for _, h := range sitemap.headers {
+			slugs = append(slugs, h.Slug)
+		}
+
+		return slugs, http.StatusOK, "slugs"
 	}
-
-	sitemap.mu.RLock()
-	defer sitemap.mu.RUnlock()
-
-	return sitemap.headers, http.StatusOK, "sitemap"
+	return nil, http.StatusNotFound, ""
 }
