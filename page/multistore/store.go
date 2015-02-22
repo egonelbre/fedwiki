@@ -1,6 +1,6 @@
 package multistore
 
-import "github.com/egonelbre/wiki-go-server/page"
+import "github.com/egonelbre/fedwiki/page"
 
 // Store serves/saves in the stores in specified order.
 // A store in the order list will handle the page only if it contains the page.

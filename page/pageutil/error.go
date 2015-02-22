@@ -3,7 +3,7 @@ package pageutil
 import (
 	"os"
 
-	"github.com/egonelbre/wiki-go-server/page"
+	"github.com/egonelbre/fedwiki/page"
 )
 
 func ConvertOSError(err error) error {

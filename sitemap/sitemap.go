@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/egonelbre/wiki-go-server/page"
+	"github.com/egonelbre/fedwiki/page"
 )
 
 // provides the /system pages

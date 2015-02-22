@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/egonelbre/wiki-go-server/page"
+	"github.com/egonelbre/fedwiki/page"
 )
 
 // Action can validate a page.Action

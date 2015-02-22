@@ -3,7 +3,7 @@ package plugin
 import (
 	"path/filepath"
 
-	"github.com/egonelbre/wiki-go-server/page/globstore"
+	"github.com/egonelbre/fedwiki/page/globstore"
 )
 
 type Store struct {

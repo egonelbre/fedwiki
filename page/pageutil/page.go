@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/egonelbre/wiki-go-server/page"
+	"github.com/egonelbre/fedwiki/page"
 )
 
 func Read(r io.Reader) (*page.Page, error) {

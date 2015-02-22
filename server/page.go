@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/egonelbre/wiki-go-server/page"
-	"github.com/egonelbre/wiki-go-server/page/pageutil"
+	"github.com/egonelbre/fedwiki/page"
+	"github.com/egonelbre/fedwiki/page/pageutil"
 )
 
 func (s *Server) handlePage(rw http.ResponseWriter, r *http.Request) (response interface{}, code int) {

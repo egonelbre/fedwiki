@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/egonelbre/wiki-go-server/page"
+	"github.com/egonelbre/fedwiki/page"
 )
 
 type System interface {

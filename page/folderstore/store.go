@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/egonelbre/wiki-go-server/page"
-	"github.com/egonelbre/wiki-go-server/page/pageutil"
+	"github.com/egonelbre/fedwiki/page"
+	"github.com/egonelbre/fedwiki/page/pageutil"
 )
 
 type Store struct {
