@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"path"
 	"strings"
@@ -10,15 +11,35 @@ import (
 	"github.com/egonelbre/fedwiki/page"
 )
 
-type Server struct {
-	Pages   page.Store
-	Systems []System
+type Renderer interface {
+	Render(responseType string, w io.Writer, template string, data interface{}) error
 }
 
-func New(pages page.Store, systems ...System) *Server {
+type System interface {
+	// if the system doesn't want to handle the request it should
+	//   return nil, http.StatusNotFound, ""
+	// template is an optional argument to give to the renderer
+	Handle(rw http.ResponseWriter, r *http.Request) (response interface{}, code int, template string)
+}
+
+// PageSystem is a System that cares about page changes
+//   note that stores can change even if there isn't an explicit notification
+type PageSystem interface {
+	System
+	PageChanged(p *page.Page, err error)
+}
+
+type Server struct {
+	Pages    page.Store
+	Renderer Renderer
+	Systems  []System
+}
+
+func New(pages page.Store, renderer Renderer, systems ...System) *Server {
 	return &Server{
-		Pages:   pages,
-		Systems: systems,
+		Pages:    pages,
+		Renderer: renderer,
+		Systems:  systems,
 	}
 }
 
@@ -71,13 +92,48 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	case "text/html":
 		fallthrough
 	default:
-		rw.Header().Set("Content-Type", "text/html")
-		rw.WriteHeader(code)
-		if template == "" {
-			s.RenderHTML(rw, response)
-		} else {
-			s.RenderTemplate(rw, template+".html", response)
+		if responseType == "" {
+			responseType = "text/html"
 		}
 
+		if s.Renderer == nil {
+			rw.Header().Set("Content-Type", "text/plain")
+			rw.WriteHeader(code)
+			fmt.Fprintf(rw, "%#v\n", response)
+			return
+		}
+
+		rw.Header().Set("Content-Type", "text/html")
+		rw.WriteHeader(code)
+
+		if template == "" {
+			if _, ok := response.(ErrorResponse); ok {
+				template = "error"
+			}
+		}
+
+		err := s.Renderer.Render(responseType, rw, template, response)
+		if err != nil {
+			fmt.Fprintf(rw, err.Error())
+		}
+	}
+}
+
+func (s *Server) handleSystem(rw http.ResponseWriter, r *http.Request) (response interface{}, code int, template string) {
+	for _, sys := range s.Systems {
+		resp, code, template := sys.Handle(rw, r)
+		if code != http.StatusNotFound {
+			return resp, code, template
+		}
+	}
+	err, code := Error(http.StatusNotFound, "system was not found")
+	return err, code, ""
+}
+
+func (s *Server) PageChanged(p *page.Page, err error) {
+	for _, sys := range s.Systems {
+		if sys, ok := sys.(PageSystem); ok {
+			sys.PageChanged(p, err)
+		}
 	}
 }

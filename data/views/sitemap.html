@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	{{template "head.html"}}
+	<title>Sitemap</title>
+</head>
+<body>
+	<header>
+		<h1>Sitemap</h1>
+	</header>
+	<ul class="sitemap">
+	{{ range . }}
+		<li>
+			<h3><a href="/{{.Slug}}">{{.Title}}</a></h3>
+			<p>{{.Date}}</p>
+			<p>{{.Synopsis}}</p>
+		</li>{{ end }}
+	</ul>
+</body>
+</html>

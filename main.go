@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/egonelbre/fedwiki/page/folderstore"
+	"github.com/egonelbre/fedwiki/renderer"
 	"github.com/egonelbre/fedwiki/server"
 	"github.com/egonelbre/fedwiki/sitemap"
 )
@@ -73,7 +73,8 @@ func main() {
 	sitemap := sitemap.New(store)
 	sitemap.Update()
 
-	server := server.New(store, sitemap)
+	render := renderer.New(filepath.Join(*dirviews, "*"))
+	server := server.New(store, render, sitemap)
 
 	log.Printf("Listening on %v...\n", *addr)
 	check(http.ListenAndServe(*addr,
@@ -82,7 +83,6 @@ func main() {
 
 			if strings.HasPrefix(r.URL.Path, "/static/") {
 				upath := filepath.Join(*dirstatic, r.URL.Path[len("/static"):])
-				fmt.Println(upath)
 				http.ServeFile(rw, r, path.Clean(upath))
 				return
 			}

@@ -57,6 +57,12 @@ func LoadHeader(filename string, slug page.Slug) (*page.Header, error) {
 		return nil, err
 	}
 
+	if header.Date.IsZero() {
+		if info, err := os.Stat(filename); err == nil {
+			header.Date = info.ModTime()
+		}
+	}
+
 	header.Slug = slug
 	return header, nil
 }
