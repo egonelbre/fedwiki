@@ -19,7 +19,7 @@ func Read(r io.Reader) (*page.Page, error) {
 	return page, nil
 }
 
-func Load(filename string) (*page.Page, error) {
+func Load(filename string, slug page.Slug) (*page.Page, error) {
 	data, err := ioutil.ReadFile(filename)
 	err = ConvertOSError(err)
 	if err != nil {
@@ -40,10 +40,11 @@ func Load(filename string) (*page.Page, error) {
 		}
 	}
 
+	page.Header.Slug = slug
 	return page, nil
 }
 
-func LoadHeader(filename string) (*page.Header, error) {
+func LoadHeader(filename string, slug page.Slug) (*page.Header, error) {
 	data, err := ioutil.ReadFile(filename)
 	err = ConvertOSError(err)
 	if err != nil {
@@ -55,6 +56,8 @@ func LoadHeader(filename string) (*page.Header, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	header.Slug = slug
 	return header, nil
 }
 

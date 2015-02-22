@@ -12,13 +12,13 @@ import (
 
 type Server struct {
 	Pages   page.Store
-	Sitemap *Sitemap
+	Systems []System
 }
 
-func New(pages page.Store) *Server {
+func New(pages page.Store, systems ...System) *Server {
 	return &Server{
 		Pages:   pages,
-		Sitemap: NewSitemap(pages),
+		Systems: systems,
 	}
 }
 
@@ -54,8 +54,10 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	var response interface{}
 	var code int
+	var template string
+
 	if strings.HasPrefix(r.URL.Path, "/system/") {
-		response, code = s.handleSystem(rw, r)
+		response, code, template = s.handleSystem(rw, r)
 	} else {
 		response, code = s.handlePage(rw, r)
 	}
@@ -71,6 +73,11 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	default:
 		rw.Header().Set("Content-Type", "text/html")
 		rw.WriteHeader(code)
-		s.RenderHTML(rw, response)
+		if template == "" {
+			s.RenderHTML(rw, response)
+		} else {
+			s.RenderTemplate(rw, template+".html", response)
+		}
+
 	}
 }

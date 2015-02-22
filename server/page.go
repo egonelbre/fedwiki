@@ -29,8 +29,6 @@ func (s *Server) handlePage(rw http.ResponseWriter, r *http.Request) (response i
 		p.Slug = slug
 		return p, http.StatusOK
 	case "PUT":
-		defer s.Sitemap.Update()
-
 		var p *page.Page
 		var err error
 
@@ -49,12 +47,12 @@ func (s *Server) handlePage(rw http.ResponseWriter, r *http.Request) (response i
 
 		err = s.Pages.Save(slug, p)
 		if err != nil {
+			s.PageChanged(p, err)
 			return Error(http.StatusInternalServerError, err.Error())
 		}
+		s.PageChanged(p, nil)
 		return nil, http.StatusOK
 	case "PATCH":
-		defer s.Sitemap.Update()
-
 		var action page.Action
 		var err error
 
@@ -74,14 +72,18 @@ func (s *Server) handlePage(rw http.ResponseWriter, r *http.Request) (response i
 		p, err := s.Pages.Load(slug)
 		if err != nil {
 			if err == page.ErrNotExist {
+				s.PageChanged(p, err)
 				return Errorf(http.StatusNotFound, `Page "%s" does not exist.`, slug)
 			}
+			s.PageChanged(p, err)
 			return Error(http.StatusInternalServerError, err.Error())
 		}
 
 		if err := p.Apply(action); err != nil {
+			s.PageChanged(p, err)
 			return Error(http.StatusInternalServerError, err.Error())
 		}
+		s.PageChanged(p, nil)
 		return nil, http.StatusOK
 	default:
 		return Errorf(http.StatusNotAcceptable, `Unknown request Method "%s".`, r.Method)

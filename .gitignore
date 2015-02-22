@@ -26,3 +26,5 @@ _testmain.go
 
 cmd/fedwiki/default-data/**
 cmd/fedwiki/data/**
+
+**/temp/**

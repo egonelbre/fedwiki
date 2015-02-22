@@ -28,7 +28,8 @@ func (store *Store) Exists(slug page.Slug) bool {
 }
 
 func (store *Store) Load(slug page.Slug) (*page.Page, error) {
-	return pageutil.Load(store.path(slug))
+	page, err := pageutil.Load(store.path(slug), slug)
+	return page, err
 }
 
 func (store *Store) Save(slug page.Slug, page *page.Page) error {
@@ -47,8 +48,11 @@ func (store *Store) List() ([]*page.Header, error) {
 	for _, info := range list {
 		filename := filepath.Join(store.Dir, info.Name())
 
-		header, err := pageutil.LoadHeader(filename)
+		slug := page.Slugify(filepath.Base(filename))
+
+		header, err := pageutil.LoadHeader(filename, slug)
 		err = pageutil.ConvertOSError(err)
+		//TODO: maybe ignore this error?
 		if err != nil {
 			return nil, err
 		}

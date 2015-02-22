@@ -13,6 +13,7 @@ import (
 
 	"github.com/egonelbre/wiki-go-server/page/folderstore"
 	"github.com/egonelbre/wiki-go-server/server"
+	"github.com/egonelbre/wiki-go-server/sitemap"
 )
 
 type Dirs struct {
@@ -96,7 +97,11 @@ func main() {
 	}
 
 	store := folderstore.New(dir.Pages)
-	server := server.New(store)
+
+	sitemap := sitemap.New(store)
+	sitemap.Update()
+
+	server := server.New(store, sitemap)
 
 	log.Printf("Listening on %v...\n", *addr)
 	check(http.ListenAndServe(*addr,
