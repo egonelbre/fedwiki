@@ -20,26 +20,32 @@ All page urls can be suffixed with `.json` to return JSON content.
 
 * `PUT /<slug>` - creates a new page with specified slug. The title must use the specified conversion to slug, otherwise the request will be rejected. Request data:
 
-	{
-		"slug": "/<slug>"
-		"title": "<title>",
-		"synopsis": "<synopsis>",
-		"version": 0,
-		"story": [],
-		"journal": []
-	}
+```
+{
+	"slug": "/<slug>"
+	"title": "<title>",
+	"synopsis": "<synopsis>",
+	"version": 0,
+	"story": [],
+	"journal": []
+}
+```
 
 * `DELETE /<slug>` - deletes the page with specified slug. If the request data `slug` or `version` mismatch the data in the page store the request will be rejected. Request data:
 
-	{
-		"slug": "<slug>",
-		"version": <version>
-	}
+```
+{
+	"slug": "<slug>",
+	"version": <version>
+}
+```
 
 * `PATCH /<slug>` - updates the page with specified slug. If the request data `version` mismatches the server may either do a merge or reject the request. Request data:
-	
-	{
-		"slug": "<slug>"
-		"version": <version>
-		"action": <action data>
-	}
+
+```	
+{
+	"slug": "<slug>"
+	"version": <version>
+	"action": <action data>
+}
+```
