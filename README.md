@@ -14,5 +14,5 @@ It does not support plugins requiring javascript server side component.
 ## License
 
 You may use the Wiki under either the
-[MIT License](https://github.com/egonelbre/fedwiki/master/LICENSE-MIT) or the 
-[GNU General Public License](https://github.com/egonelbre/fedwiki/master/LICENSE-GPL) (GPL) Version 2.
+[MIT License](https://raw.githubusercontent.com/egonelbre/fedwiki/master/LICENSE-MIT) or the 
+[GNU General Public License](https://raw.githubusercontent.com/egonelbre/fedwiki/master/LICENSE-GPL) (GPL) Version 2.
