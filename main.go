@@ -87,6 +87,11 @@ func main() {
 				return
 			}
 
+			if r.URL.Path == "/favicon.png" {
+				http.ServeFile(rw, r, filepath.Join(*dirstatus, "favicon.png"))
+				return
+			}
+
 			if r.URL.Path == "" || r.URL.Path == "/" {
 				http.ServeFile(rw, r, *clientpage)
 				return
