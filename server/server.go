@@ -2,18 +2,18 @@ package server
 
 import "net/http"
 
-type Service interface {
+type Handler interface {
 	Handle(rw http.ResponseWriter, r *http.Request) *Response
 }
 
 type Server struct {
-	Service  Service
+	Handler  Handler
 	Renderer Renderer
 }
 
-func New(service Service, renderer Renderer) *Server {
+func New(handler Handler, renderer Renderer) *Server {
 	return &Server{
-		Service:  service,
+		Handler:  handler,
 		Renderer: renderer,
 	}
 }
@@ -25,6 +25,6 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := s.Service.Handle(rw, r)
+	response := s.Handler.Handle(rw, r)
 	RenderCommon(rw, s.Renderer, responseType, response)
 }
