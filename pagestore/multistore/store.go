@@ -1,22 +1,22 @@
 package multistore
 
-import "github.com/egonelbre/fedwiki/page"
+import "github.com/egonelbre/fedwiki"
 
 // Store serves/saves in the stores in specified order.
-// A store in the order list will handle the page only if it contains the page.
+// A store in the order list will handle the page only if it contains the Page.
 // Requests not with a specific will be handled by Fallback.
 //
 // It is usually beneficial to also have Fallback inside the Order.
 type Store struct {
-	Fallback page.Store
-	Order    []page.Store
+	Fallback fedwiki.PageStore
+	Order    []fedwiki.PageStore
 }
 
-func New(fallback page.Store, order ...page.Store) *Store {
+func New(fallback fedwiki.PageStore, order ...fedwiki.PageStore) *Store {
 	return &Store{fallback, order}
 }
 
-func (store *Store) Exists(slug page.Slug) bool {
+func (store *Store) Exists(slug fedwiki.Slug) bool {
 	for _, store := range store.Order {
 		if store.Exists(slug) {
 			return true
@@ -25,7 +25,7 @@ func (store *Store) Exists(slug page.Slug) bool {
 	return false
 }
 
-func (store *Store) Load(slug page.Slug) (*page.Page, error) {
+func (store *Store) Load(slug fedwiki.Slug) (*fedwiki.Page, error) {
 	for _, store := range store.Order {
 		if store.Exists(slug) {
 			return store.Load(slug)
@@ -35,7 +35,7 @@ func (store *Store) Load(slug page.Slug) (*page.Page, error) {
 	return store.Fallback.Load(slug)
 }
 
-func (store *Store) Save(slug page.Slug, page *page.Page) error {
+func (store *Store) Save(slug fedwiki.Slug, page *fedwiki.Page) error {
 	for _, store := range store.Order {
 		if store.Exists(slug) {
 			return store.Save(slug, page)
@@ -46,8 +46,8 @@ func (store *Store) Save(slug page.Slug, page *page.Page) error {
 }
 
 // Discards any errors that happen in sub-stores
-func (store *Store) List() ([]*page.Header, error) {
-	headers := []*page.Header{}
+func (store *Store) List() ([]*fedwiki.PageHeader, error) {
+	headers := []*fedwiki.PageHeader{}
 	for _, store := range store.Order {
 		sub, _ := store.List()
 		headers = append(headers, sub)

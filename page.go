@@ -1,11 +1,14 @@
-package page
+package fedwiki
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
-type Header struct {
+type Slug string
+
+type PageHeader struct {
 	Slug     Slug   `json:"slug"`
 	Title    string `json:"title"`
 	Date     Date   `json:"date"`
@@ -13,10 +16,13 @@ type Header struct {
 }
 
 type Page struct {
-	Header
+	PageHeader
 	Story   Story   `json:"story"`
 	Journal Journal `json:"journal"`
 }
+
+type Story []Item
+type Journal []Action
 
 func (page *Page) Apply(action Action) error {
 	fn, ok := actionfns[action.Type()]
@@ -30,7 +36,7 @@ func (page *Page) Apply(action Action) error {
 	}
 
 	if t, err := action.Date(); err == nil {
-		page.Header.Date = t
+		page.PageHeader.Date = t
 	}
 	return nil
 }
@@ -49,8 +55,6 @@ func (page *Page) LastModified() time.Time {
 
 	return time.Now()
 }
-
-type Story []Item
 
 func (s Story) IndexOf(id string) (index int, ok bool) {
 	for i, item := range s {
@@ -117,4 +121,32 @@ func (s *Story) RemoveById(id string) (item Item, err error) {
 	return item, fmt.Errorf("missing item id \"%v\"", id)
 }
 
-type Journal []Action
+type Item map[string]interface{}
+
+func (item Item) Val(key string) string {
+	if s, ok := item[key].(string); ok {
+		return s
+	}
+	return ""
+}
+
+func (item Item) Id() string { return item.Val("id") }
+
+type Date struct{ time.Time }
+
+func ParseDate(data string) (Date, error) {
+	v, err := strconv.Atoi(data)
+	if err != nil {
+		return Date{}, err
+	}
+	return Date{time.Unix(int64(v), 0)}, nil
+}
+
+func (d Date) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Itoa(int(d.Unix()))), nil
+}
+
+func (d *Date) UnmarshalJSON(data []byte) (err error) {
+	*d, err = ParseDate(string(data))
+	return
+}

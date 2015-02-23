@@ -1,17 +1,17 @@
-package pageutil
+package pagestore
 
 import (
 	"os"
 
-	"github.com/egonelbre/fedwiki/page"
+	"github.com/egonelbre/fedwiki"
 )
 
 func ConvertOSError(err error) error {
 	if os.IsNotExist(err) {
-		return page.ErrNotExist
+		return fedwiki.ErrNotExist
 	}
 	if os.IsPermission(err) {
-		return page.ErrPermission
+		return fedwiki.ErrPermission
 	}
 	return err
 }

@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/egonelbre/fedwiki/page"
-	"github.com/egonelbre/fedwiki/page/pageutil"
+	"github.com/egonelbre/fedwiki"
+	"github.com/egonelbre/fedwiki/pagestore"
 )
 
 type Store struct {
@@ -17,41 +17,41 @@ func New(dir string) *Store {
 	return &Store{dir}
 }
 
-func (store *Store) path(slug page.Slug) string {
+func (store *Store) path(slug fedwiki.Slug) string {
 	filename := filepath.FromSlash(string(slug))
 	return filepath.Join(store.Dir, filename)
 }
 
-func (store *Store) Exists(slug page.Slug) bool {
+func (store *Store) Exists(slug fedwiki.Slug) bool {
 	stat, err := os.Stat(store.path(slug))
 	return os.IsExist(err) && !stat.IsDir()
 }
 
-func (store *Store) Load(slug page.Slug) (*page.Page, error) {
-	page, err := pageutil.Load(store.path(slug), slug)
+func (store *Store) Load(slug fedwiki.Slug) (*fedwiki.Page, error) {
+	page, err := pagestore.Load(store.path(slug), slug)
 	return page, err
 }
 
-func (store *Store) Save(slug page.Slug, page *page.Page) error {
-	return pageutil.Save(page, store.path(slug))
+func (store *Store) Save(slug fedwiki.Slug, page *fedwiki.Page) error {
+	return pagestore.Save(page, store.path(slug))
 }
 
 // Discards any errors that happen in sub-stores
-func (store *Store) List() ([]*page.Header, error) {
+func (store *Store) List() ([]*fedwiki.PageHeader, error) {
 	list, err := ioutil.ReadDir(store.Dir)
-	err = pageutil.ConvertOSError(err)
+	err = pagestore.ConvertOSError(err)
 	if err != nil {
 		return nil, err
 	}
 
-	headers := []*page.Header{}
+	headers := []*fedwiki.PageHeader{}
 	for _, info := range list {
 		filename := filepath.Join(store.Dir, info.Name())
 
-		slug := page.Slugify(filepath.Base(filename))
+		slug := fedwiki.Slugify(filepath.Base(filename))
 
-		header, err := pageutil.LoadHeader(filename, slug)
-		err = pageutil.ConvertOSError(err)
+		header, err := pagestore.LoadHeader(filename, slug)
+		err = pagestore.ConvertOSError(err)
 		//TODO: maybe ignore this error?
 		if err != nil {
 			return nil, err

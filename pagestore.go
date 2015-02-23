@@ -1,12 +1,10 @@
-package page
+package fedwiki
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
 )
-
-type Slug string
 
 var rxSlug = regexp.MustCompile(`^[a-zA-Z0-9\.\/_-]+$`)
 
@@ -38,9 +36,9 @@ func Slugify(s string) Slug {
 	return Slug(s)
 }
 
-type Store interface {
+type PageStore interface {
 	Exists(slug Slug) bool
 	Load(slug Slug) (*Page, error)
 	Save(slug Slug, page *Page) error
-	List() ([]*Header, error)
+	List() ([]*PageHeader, error)
 }

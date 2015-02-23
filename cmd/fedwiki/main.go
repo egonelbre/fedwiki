@@ -6,14 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 
-	"github.com/egonelbre/fedwiki/page"
-	"github.com/egonelbre/fedwiki/page/folderstore"
+	"github.com/egonelbre/fedwiki"
+	"github.com/egonelbre/fedwiki/pagestore"
+	"github.com/egonelbre/fedwiki/pagestore/folderstore"
 	"github.com/egonelbre/fedwiki/renderer"
-	"github.com/egonelbre/fedwiki/server"
 	"github.com/egonelbre/fedwiki/sitemap"
 )
 
@@ -76,40 +74,28 @@ func main() {
 
 	render := renderer.New(filepath.Join(*dirviews, "*"))
 
-	systems := Systems{
-		List:     []System{sitemap},
-		Renderer: render,
-	}
-	server := server.New(page.Service{store}, render)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(*dirstatic))))
+
+	http.Handle("/system/sitemap", &fedwiki.Server{sitemap, render})
+	http.Handle("/system/slugs", &fedwiki.Server{sitemap, render})
+
+	pageserver := &fedwiki.Server{pagestore.Handler{store}, render}
+	http.Handle("/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/favicon.png" {
+			http.ServeFile(rw, r, filepath.Join(*dirstatus, "favicon.png"))
+			return
+		}
+
+		if r.URL.Path == "" || r.URL.Path == "/" {
+			http.ServeFile(rw, r, *clientpage)
+			return
+		}
+
+		pageserver.ServeHTTP(rw, r)
+	}))
 
 	log.Printf("Listening on %v...\n", *addr)
-	check(http.ListenAndServe(*addr,
-		http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			log.Printf("Request '%s'\n", r.URL)
-
-			if strings.HasPrefix(r.URL.Path, "/static/") {
-				upath := filepath.Join(*dirstatic, r.URL.Path[len("/static"):])
-				http.ServeFile(rw, r, path.Clean(upath))
-				return
-			}
-
-			if r.URL.Path == "/favicon.png" {
-				http.ServeFile(rw, r, filepath.Join(*dirstatus, "favicon.png"))
-				return
-			}
-
-			if r.URL.Path == "" || r.URL.Path == "/" {
-				http.ServeFile(rw, r, *clientpage)
-				return
-			}
-
-			if strings.HasPrefix(r.URL.Path, "/system/") {
-				systems.ServeHTTP(rw, r)
-				return
-			}
-
-			server.ServeHTTP(rw, r)
-		})))
+	check(http.ListenAndServe(*addr, nil))
 }
 
 func copyfiles(src, dst string) error {
@@ -133,34 +119,4 @@ func copyfiles(src, dst string) error {
 			}
 			return ioutil.WriteFile(filepath.Join(dst, path), data, info.Mode())
 		})
-}
-
-type System interface {
-	Handle(rw http.ResponseWriter, r *http.Request) *server.Response
-}
-
-type Systems struct {
-	List     []System
-	Renderer server.Renderer
-}
-
-func (s *Systems) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	responseType, code, err := server.HandleAccept(r)
-	if err != nil {
-		http.Error(rw, err.Error(), code)
-		return
-	}
-	response := s.Handle(rw, r)
-	server.RenderCommon(rw, s.Renderer, responseType, response)
-}
-
-func (s *Systems) Handle(rw http.ResponseWriter, r *http.Request) *server.Response {
-	for _, sys := range s.List {
-		response := sys.Handle(rw, r)
-		if response != nil {
-			return response
-		}
-	}
-
-	return server.Errorf(http.StatusNotFound, "Page not found.")
 }

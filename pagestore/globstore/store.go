@@ -4,8 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/egonelbre/fedwiki/page"
-	"github.com/egonelbre/fedwiki/page/pageutil"
+	"github.com/egonelbre/fedwiki"
 )
 
 type Store struct {
@@ -17,7 +16,7 @@ func New(glob string) *Store {
 	return &Store{glob}
 }
 
-func (store *Store) path(slug page.Slug) (string, error) {
+func (store *Store) path(slug fedwiki.Slug) (string, error) {
 	// todo, cache matches
 	matches, err := filepath.Glob(store.Glob)
 	err = pageutil.ConvertOSError(err)
@@ -31,10 +30,10 @@ func (store *Store) path(slug page.Slug) (string, error) {
 		}
 	}
 
-	return "", page.ErrNotExist
+	return "", fedwiki.ErrNotExist
 }
 
-func (store *Store) Exists(slug page.Slug) bool {
+func (store *Store) Exists(slug fedwiki.Slug) bool {
 	path, err := store.path(slug)
 	if err != nil {
 		return false
@@ -44,7 +43,7 @@ func (store *Store) Exists(slug page.Slug) bool {
 	return os.IsExist(err) && !stat.IsDir()
 }
 
-func (store *Store) Load(slug page.Slug) (*page.Page, error) {
+func (store *Store) Load(slug fedwiki.Slug) (*fedwiki.Page, error) {
 	path, err := store.path(slug)
 	if err != nil {
 		return nil, err
@@ -53,7 +52,7 @@ func (store *Store) Load(slug page.Slug) (*page.Page, error) {
 	return pageutil.Load(path)
 }
 
-func (store *Store) Save(slug page.Slug, page *page.Page) error {
+func (store *Store) Save(slug fedwiki.Slug, page *fedwiki.Page) error {
 	path, err := store.path(slug)
 	if err != nil {
 		return nil, err
@@ -63,14 +62,14 @@ func (store *Store) Save(slug page.Slug, page *page.Page) error {
 }
 
 // Discards any errors that happen in sub-stores
-func (store *Store) List() ([]*page.Header, error) {
+func (store *Store) List() ([]*fedwiki.PageHeader, error) {
 	matches, err := filepath.Glob(store.Glob)
 	err = pageutil.ConvertOSError(err)
 	if err != nil {
 		return "", err
 	}
 
-	headers := []*page.Header{}
+	headers := []*fedwiki.PageHeader{}
 	for _, filename := range matches {
 		header, err := pageutil.LoadHeader(filename)
 		err = pageutil.ConvertOSError(err)

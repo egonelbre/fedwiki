@@ -4,8 +4,8 @@ This project implements a Federated Wiki server in Go.
 
 ## Installation
 
-    go get -u github.com/egonelbre/fedwiki
-    go install github.com/egonelbre/fedwiki
+    go get -u github.com/egonelbre/fedwiki/cmd/fedwiki
+    go install github.com/egonelbre/fedwiki/cmd/fedwiki
 
 ## Notes
 

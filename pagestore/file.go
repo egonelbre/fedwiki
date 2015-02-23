@@ -1,46 +1,46 @@
-package pageutil
+package pagestore
 
 import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
 
-	"github.com/egonelbre/fedwiki/page"
+	"github.com/egonelbre/fedwiki"
 )
 
-func Load(filename string, slug page.Slug) (*page.Page, error) {
+func Load(filename string, slug fedwiki.Slug) (*fedwiki.Page, error) {
 	data, err := ioutil.ReadFile(filename)
 	err = ConvertOSError(err)
 	if err != nil {
 		return nil, err
 	}
 
-	p := &page.Page{}
-	err = json.Unmarshal(data, p)
+	page := &fedwiki.Page{}
+	err = json.Unmarshal(data, page)
 	if err != nil {
 		return nil, err
 	}
 
-	if p.Header.Date.IsZero() {
+	if page.PageHeader.Date.IsZero() {
 		if info, err := os.Stat(filename); err == nil {
-			p.Header.Date = page.Date{info.ModTime()}
+			page.PageHeader.Date = fedwiki.Date{info.ModTime()}
 		} else {
-			p.Header.Date = page.Date{p.LastModified()}
+			page.PageHeader.Date = fedwiki.Date{page.LastModified()}
 		}
 	}
 
-	p.Header.Slug = slug
-	return p, nil
+	page.PageHeader.Slug = slug
+	return page, nil
 }
 
-func LoadHeader(filename string, slug page.Slug) (*page.Header, error) {
+func LoadHeader(filename string, slug fedwiki.Slug) (*fedwiki.PageHeader, error) {
 	data, err := ioutil.ReadFile(filename)
 	err = ConvertOSError(err)
 	if err != nil {
 		return nil, err
 	}
 
-	header := &page.Header{}
+	header := &fedwiki.PageHeader{}
 	err = json.Unmarshal(data, header)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func LoadHeader(filename string, slug page.Slug) (*page.Header, error) {
 
 	if header.Date.IsZero() {
 		if info, err := os.Stat(filename); err == nil {
-			header.Date = page.Date{info.ModTime()}
+			header.Date = fedwiki.Date{info.ModTime()}
 		}
 	}
 
@@ -56,7 +56,7 @@ func LoadHeader(filename string, slug page.Slug) (*page.Header, error) {
 	return header, nil
 }
 
-func Save(page *page.Page, filename string) error {
+func Save(page *fedwiki.Page, filename string) error {
 	data, err := json.Marshal(page)
 	if err != nil {
 		return err

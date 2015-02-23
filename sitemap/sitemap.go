@@ -4,19 +4,18 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/egonelbre/fedwiki/page"
-	"github.com/egonelbre/fedwiki/server"
+	"github.com/egonelbre/fedwiki"
 )
 
 // provides the /system pages
 type Sitemap struct {
-	Store page.Store
+	Store fedwiki.PageStore
 
 	mu      sync.RWMutex
-	headers []*page.Header
+	headers []*fedwiki.PageHeader
 }
 
-func New(store page.Store) *Sitemap {
+func New(store fedwiki.PageStore) *Sitemap {
 	sitemap := &Sitemap{}
 	sitemap.Store = store
 	return sitemap
@@ -28,27 +27,27 @@ func (sitemap *Sitemap) Update() {
 	sitemap.headers, _ = sitemap.Store.List()
 }
 
-func (sitemap *Sitemap) PageChanged(p *page.Page, err error) {
+func (sitemap *Sitemap) PageChanged(page *fedwiki.Page, err error) {
 	//TODO: throttle updating
 	sitemap.Update()
 }
 
-func (sitemap *Sitemap) Handle(rw http.ResponseWriter, r *http.Request) *server.Response {
+func (sitemap *Sitemap) Handle(r *http.Request) (code int, template string, data interface{}) {
 	switch r.URL.Path {
 	case "/system/sitemap":
 		sitemap.mu.RLock()
 		defer sitemap.mu.RUnlock()
-		return &server.Response{http.StatusOK, sitemap.headers, "sitemap"}
+		return http.StatusOK, "sitemap", sitemap.headers
 	case "/system/slugs":
 		sitemap.mu.RLock()
 		defer sitemap.mu.RUnlock()
-		slugs := make([]page.Slug, 0, len(sitemap.headers))
+		slugs := make([]fedwiki.Slug, 0, len(sitemap.headers))
 		for _, h := range sitemap.headers {
 			slugs = append(slugs, h.Slug)
 		}
 
-		return &server.Response{http.StatusOK, slugs, "slugs"}
+		return http.StatusOK, "slugs", slugs
 	}
 
-	return nil
+	return fedwiki.ErrorResponse(http.StatusNotFound, "Page not found.")
 }

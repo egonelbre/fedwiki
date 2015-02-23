@@ -7,8 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/egonelbre/fedwiki/page"
-	"github.com/egonelbre/fedwiki/server"
+	"github.com/egonelbre/fedwiki"
 )
 
 type Renderer struct {
@@ -26,11 +25,7 @@ func (r *Renderer) RenderHTML(w io.Writer, tname string, data interface{}) error
 	}
 
 	if tname == "" {
-		if _, ok := data.(server.Error); ok {
-			tname = "error"
-		} else {
-			tname = "static"
-		}
+		tname = "static"
 	}
 
 	return t.ExecuteTemplate(w, tname+".html", data)
@@ -44,7 +39,7 @@ var (
 func replaceLinks(s string) template.HTML {
 	s = rxInternal.ReplaceAllStringFunc(s, func(s string) string {
 		s = strings.Trim(s, "[]")
-		return fmt.Sprintf(`<a href="%s">%s</a>`, page.Slugify(s), s)
+		return fmt.Sprintf(`<a href="%s">%s</a>`, fedwiki.Slugify(s), s)
 	})
 	s = rxExternal.ReplaceAllString(s, `<a href="$1">$2</a>`)
 	return template.HTML(s)

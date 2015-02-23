@@ -1,9 +1,0 @@
-{{     if (eq .type "paragraph")}}{{template "paragraph" . }}
-{{else if (eq .type "reference")}}{{template "reference" . }}
-{{else if (eq .type "html")}}{{template "html" . }}
-{{else if (eq .type "factory")}}{{template "factory" . }}
-{{else}}
-<div class="{{.type}}">
-	<dl>{{range $key, $elem := .}}<dt>{{$key}}</dt><dd>{{$elem}}</dd>{{ end }}</dl>
-</div>
-{{ end }}
