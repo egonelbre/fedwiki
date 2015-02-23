@@ -24,7 +24,7 @@ _testmain.go
 *.test
 *.prof
 
-cmd/fedwiki/default-data/**
 cmd/fedwiki/data/**
+cmd/fedwiki/plugins/**
 
 **/temp/**

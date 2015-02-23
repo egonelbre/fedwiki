@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/egonelbre/fedwiki"
 	"github.com/egonelbre/fedwiki/pagestore"
 	"github.com/egonelbre/fedwiki/pagestore/folderstore"
+	"github.com/egonelbre/fedwiki/plugin"
 	"github.com/egonelbre/fedwiki/renderer"
 	"github.com/egonelbre/fedwiki/sitemap"
 )
@@ -22,6 +24,7 @@ var (
 	dirdefpages = flag.String("default", "default-pages", "directory for default pages")
 	dirviews    = flag.String("views", "views", "directory for storing views")
 	dirstatic   = flag.String("static", "static", "directory for storing static content")
+	dirplugins  = flag.String("plugins", "plugins", "directory for storing plugins content")
 
 	dirpages  = flag.String("pages", filepath.Join("data", "pages"), "directory for storing pages")
 	dirstatus = flag.String("status", filepath.Join("data", "status"), "directory for storing status")
@@ -68,32 +71,52 @@ func main() {
 		check(copyfiles(*dirdefpages, *dirpages))
 	}
 
-	store := folderstore.New(*dirpages)
-
-	sitemap := sitemap.New(store)
-	sitemap.Update()
-
 	render := renderer.New(filepath.Join(*dirviews, "*"))
+
+	mainstore := folderstore.New(*dirpages)
+	sitemap := sitemap.New(mainstore)
+	sitemap.Update()
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(*dirstatic))))
 
-	http.Handle("/system/sitemap", &fedwiki.Server{sitemap, render})
-	http.Handle("/system/slugs", &fedwiki.Server{sitemap, render})
+	plugins := &plugin.Server{*dirplugins}
+	pluginsserver := &fedwiki.Server{plugins, render}
 
-	pageserver := &fedwiki.Server{pagestore.Handler{store}, render}
-	http.Handle("/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/favicon.png" {
-			http.ServeFile(rw, r, filepath.Join(*dirstatus, "favicon.png"))
-			return
-		}
+	http.Handle("/plugins/", plugins)
 
-		if r.URL.Path == "" || r.URL.Path == "/" {
-			http.ServeFile(rw, r, *clientpage)
-			return
-		}
+	sitemapserver := &fedwiki.Server{sitemap, render}
 
-		pageserver.ServeHTTP(rw, r)
-	}))
+	pageserver := &fedwiki.Server{pagestore.Handler{mainstore}, render}
+	http.Handle("/",
+		http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/system/sitemap") ||
+				strings.HasPrefix(r.URL.Path, "/system/slugs") {
+				sitemapserver.ServeHTTP(rw, r)
+				return
+			}
+
+			if strings.HasPrefix(r.URL.Path, "/system/plugins") ||
+				strings.HasPrefix(r.URL.Path, "/system/factories") {
+				pluginsserver.ServeHTTP(rw, r)
+				return
+			}
+
+			if r.URL.Path == "/favicon.png" {
+				http.ServeFile(rw, r, filepath.Join(*dirstatus, "favicon.png"))
+				return
+			}
+
+			if r.URL.Path == "" || r.URL.Path == "/" {
+				http.ServeFile(rw, r, *clientpage)
+				return
+			}
+
+			if r.Method != "GET" {
+				defer sitemap.Update()
+			}
+
+			pageserver.ServeHTTP(rw, r)
+		}))
 
 	log.Printf("Listening on %v...\n", *addr)
 	check(http.ListenAndServe(*addr, nil))

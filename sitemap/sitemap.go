@@ -8,31 +8,27 @@ import (
 )
 
 // provides the /system pages
-type Sitemap struct {
+type Handler struct {
 	Store fedwiki.PageStore
 
 	mu      sync.RWMutex
 	headers []*fedwiki.PageHeader
 }
 
-func New(store fedwiki.PageStore) *Sitemap {
-	sitemap := &Sitemap{}
+func New(store fedwiki.PageStore) *Handler {
+	sitemap := &Handler{}
 	sitemap.Store = store
 	return sitemap
 }
 
-func (sitemap *Sitemap) Update() {
+func (sitemap *Handler) Update() {
+	//TODO: throttle updates
 	sitemap.mu.Lock()
 	defer sitemap.mu.Unlock()
 	sitemap.headers, _ = sitemap.Store.List()
 }
 
-func (sitemap *Sitemap) PageChanged(page *fedwiki.Page, err error) {
-	//TODO: throttle updating
-	sitemap.Update()
-}
-
-func (sitemap *Sitemap) Handle(r *http.Request) (code int, template string, data interface{}) {
+func (sitemap *Handler) Handle(r *http.Request) (code int, template string, data interface{}) {
 	switch r.URL.Path {
 	case "/system/sitemap":
 		sitemap.mu.RLock()
