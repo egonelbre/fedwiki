@@ -18,12 +18,13 @@ import (
 var (
 	addr = flag.String("listen", "", "HTTP listening address")
 
-	clientpage  = flag.String("client", filepath.Join("data", "client.html"), "client html page")
-	dirdefpages = flag.String("default", filepath.Join("data", "default-pages"), "directory for default pages")
-	dirpages    = flag.String("pages", filepath.Join("data", "pages"), "directory for storing pages")
-	dirstatus   = flag.String("status", filepath.Join("data", "status"), "directory for storing status")
-	dirviews    = flag.String("views", filepath.Join("data", "views"), "directory for storing views")
-	dirstatic   = flag.String("static", filepath.Join("data", "static"), "directory for storing static content")
+	clientpage  = flag.String("client", "client.html", "client html page")
+	dirdefpages = flag.String("default", "default-pages", "directory for default pages")
+	dirviews    = flag.String("views", "views", "directory for storing views")
+	dirstatic   = flag.String("static", "static", "directory for storing static content")
+
+	dirpages  = flag.String("pages", filepath.Join("data", "pages"), "directory for storing pages")
+	dirstatus = flag.String("status", filepath.Join("data", "status"), "directory for storing status")
 )
 
 func absolute(s string) string {

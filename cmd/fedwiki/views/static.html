@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	{{template "head.html"}}
+	<title>{{.Title}}</title>
+</head>
+<body>
+	<header>
+		<h1>{{.Title}}</h1>
+		<h3>{{.Synopsis}}</h3>
+		<span>{{.Date}}</span>
+	</header>
+	<article>
+		{{ range $i, $item := .Story }}{{template "item.html" $item }}{{ end }}
+	</article>
+	<footer>
+		<a href="/system/sitemap">Sitemap</a>
+	</footer>
+</body>
+</html>
