@@ -31,6 +31,11 @@ type Renderer interface {
 type Handler interface {
 	Handle(r *http.Request) (code int, template string, data interface{})
 }
+type HandlerFunc func(r *http.Request) (code int, template string, data interface{})
+
+func (fn HandlerFunc) Handle(r *http.Request) (code int, template string, data interface{}) {
+	return fn(r)
+}
 
 // This implements basic management of request of headers and canonicalizes the requests
 type Server struct {

@@ -12,13 +12,13 @@ type PageHeader struct {
 	Slug     Slug   `json:"slug"`
 	Title    string `json:"title"`
 	Date     Date   `json:"date"`
-	Synopsis string `json:"synopsis"`
+	Synopsis string `json:"synopsis,omitempty"`
 }
 
 type Page struct {
 	PageHeader
 	Story   Story   `json:"story"`
-	Journal Journal `json:"journal"`
+	Journal Journal `json:"journal,omitempty"`
 }
 
 type Story []Item
@@ -141,6 +141,8 @@ func ParseDate(data string) (Date, error) {
 	}
 	return Date{time.Unix(int64(v), 0)}, nil
 }
+
+func Now() Date { return Date{time.Now()} }
 
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Itoa(int(d.Unix()))), nil
