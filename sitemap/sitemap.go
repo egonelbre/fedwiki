@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/egonelbre/fedwiki/page"
+	"github.com/egonelbre/fedwiki/server"
 )
 
 // provides the /system pages
@@ -32,12 +33,12 @@ func (sitemap *Sitemap) PageChanged(p *page.Page, err error) {
 	sitemap.Update()
 }
 
-func (sitemap *Sitemap) Handle(rw http.ResponseWriter, r *http.Request) (response interface{}, code int, template string) {
+func (sitemap *Sitemap) Handle(rw http.ResponseWriter, r *http.Request) *server.Response {
 	switch r.URL.Path {
 	case "/system/sitemap":
 		sitemap.mu.RLock()
 		defer sitemap.mu.RUnlock()
-		return sitemap.headers, http.StatusOK, "sitemap"
+		return &server.Response{http.StatusOK, sitemap.headers, "sitemap"}
 	case "/system/slugs":
 		sitemap.mu.RLock()
 		defer sitemap.mu.RUnlock()
@@ -46,7 +47,8 @@ func (sitemap *Sitemap) Handle(rw http.ResponseWriter, r *http.Request) (respons
 			slugs = append(slugs, h.Slug)
 		}
 
-		return slugs, http.StatusOK, "slugs"
+		return &server.Response{http.StatusOK, slugs, "slugs"}
 	}
-	return nil, http.StatusNotFound, ""
+
+	return nil
 }

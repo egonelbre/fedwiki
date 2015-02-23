@@ -2,22 +2,11 @@ package pageutil
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"os"
 
 	"github.com/egonelbre/fedwiki/page"
 )
-
-func Read(r io.Reader) (*page.Page, error) {
-	dec := json.NewDecoder(r)
-	page := &page.Page{}
-	err := dec.Decode(page)
-	if err != nil {
-		return nil, err
-	}
-	return page, nil
-}
 
 func Load(filename string, slug page.Slug) (*page.Page, error) {
 	data, err := ioutil.ReadFile(filename)
@@ -26,22 +15,22 @@ func Load(filename string, slug page.Slug) (*page.Page, error) {
 		return nil, err
 	}
 
-	page := &page.Page{}
-	err = json.Unmarshal(data, page)
+	p := &page.Page{}
+	err = json.Unmarshal(data, p)
 	if err != nil {
 		return nil, err
 	}
 
-	if page.Header.Date.IsZero() {
+	if p.Header.Date.IsZero() {
 		if info, err := os.Stat(filename); err == nil {
-			page.Header.Date = info.ModTime()
+			p.Header.Date = page.Date{info.ModTime()}
 		} else {
-			page.Header.Date = page.LastModified()
+			p.Header.Date = page.Date{p.LastModified()}
 		}
 	}
 
-	page.Header.Slug = slug
-	return page, nil
+	p.Header.Slug = slug
+	return p, nil
 }
 
 func LoadHeader(filename string, slug page.Slug) (*page.Header, error) {
@@ -59,7 +48,7 @@ func LoadHeader(filename string, slug page.Slug) (*page.Header, error) {
 
 	if header.Date.IsZero() {
 		if info, err := os.Stat(filename); err == nil {
-			header.Date = info.ModTime()
+			header.Date = page.Date{info.ModTime()}
 		}
 	}
 

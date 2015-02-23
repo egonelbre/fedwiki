@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/egonelbre/fedwiki/page"
 	"github.com/egonelbre/fedwiki/page/folderstore"
 	"github.com/egonelbre/fedwiki/renderer"
 	"github.com/egonelbre/fedwiki/server"
@@ -74,7 +75,12 @@ func main() {
 	sitemap.Update()
 
 	render := renderer.New(filepath.Join(*dirviews, "*"))
-	server := server.New(store, render, sitemap)
+
+	systems := Systems{
+		List:     []System{sitemap},
+		Renderer: render,
+	}
+	server := server.New(page.Service{store}, render)
 
 	log.Printf("Listening on %v...\n", *addr)
 	check(http.ListenAndServe(*addr,
@@ -94,6 +100,11 @@ func main() {
 
 			if r.URL.Path == "" || r.URL.Path == "/" {
 				http.ServeFile(rw, r, *clientpage)
+				return
+			}
+
+			if strings.HasPrefix(r.URL.Path, "/system/") {
+				systems.ServeHTTP(rw, r)
 				return
 			}
 
@@ -122,4 +133,34 @@ func copyfiles(src, dst string) error {
 			}
 			return ioutil.WriteFile(filepath.Join(dst, path), data, info.Mode())
 		})
+}
+
+type System interface {
+	Handle(rw http.ResponseWriter, r *http.Request) *server.Response
+}
+
+type Systems struct {
+	List     []System
+	Renderer server.Renderer
+}
+
+func (s *Systems) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	responseType, code, err := server.HandleAccept(r)
+	if err != nil {
+		http.Error(rw, err.Error(), code)
+		return
+	}
+	response := s.Handle(rw, r)
+	server.RenderCommon(rw, s.Renderer, responseType, response)
+}
+
+func (s *Systems) Handle(rw http.ResponseWriter, r *http.Request) *server.Response {
+	for _, sys := range s.List {
+		response := sys.Handle(rw, r)
+		if response != nil {
+			return response
+		}
+	}
+
+	return server.Errorf(http.StatusNotFound, "Page not found.")
 }

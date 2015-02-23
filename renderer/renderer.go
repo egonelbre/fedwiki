@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/egonelbre/fedwiki/page"
+	"github.com/egonelbre/fedwiki/server"
 )
 
 type Renderer struct {
@@ -18,14 +19,18 @@ func New(glob string) *Renderer {
 	return &Renderer{glob}
 }
 
-func (r *Renderer) Render(responseType string, w io.Writer, tname string, data interface{}) error {
+func (r *Renderer) RenderHTML(w io.Writer, tname string, data interface{}) error {
 	t, err := template.New("").Funcs(helpers).ParseGlob(r.Glob)
 	if err != nil {
 		return err
 	}
 
 	if tname == "" {
-		tname = "static"
+		if _, ok := data.(server.Error); ok {
+			tname = "error"
+		} else {
+			tname = "static"
+		}
 	}
 
 	return t.ExecuteTemplate(w, tname+".html", data)

@@ -5,24 +5,20 @@ import (
 	"net/http"
 )
 
-type ErrorResponse struct {
+type Error struct {
 	Status string `json:"status"`
 	Code   int    `json:"code"`
 	Detail string `json:"detail"`
 }
 
-func Error(code int, detail string) (r interface{}, rcode int) {
-	return ErrorResponse{
-		Status: http.StatusText(code),
-		Code:   code,
-		Detail: detail,
-	}, code
-}
-
-func Errorf(code int, format string, args ...interface{}) (r interface{}, rcode int) {
-	return ErrorResponse{
-		Status: http.StatusText(code),
-		Code:   code,
-		Detail: fmt.Sprintf(format, args...),
-	}, code
+func Errorf(code int, format string, args ...interface{}) *Response {
+	return &Response{
+		Data: Error{
+			Status: http.StatusText(code),
+			Code:   code,
+			Detail: fmt.Sprintf(format, args...),
+		},
+		Template: "error",
+		Code:     code,
+	}
 }
