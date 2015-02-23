@@ -64,6 +64,7 @@ func main() {
 	*dirstatus = absolute(*dirstatus)
 	*dirviews = absolute(*dirviews)
 	*dirstatic = absolute(*dirstatic)
+	*dirplugins = absolute(*dirplugins)
 
 	// if we don't have a pages directory assume that we haven't
 	// setup the content yet and copy everything from default data
@@ -79,7 +80,8 @@ func main() {
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(*dirstatic))))
 
-	plugins := &plugin.Server{*dirplugins}
+	plugins := plugin.NewServer(*dirplugins)
+	plugins.Update()
 	pluginsserver := &fedwiki.Server{plugins, render}
 
 	http.Handle("/plugins/", plugins)
