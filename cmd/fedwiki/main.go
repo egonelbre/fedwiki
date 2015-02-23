@@ -69,7 +69,9 @@ func main() {
 	// if we don't have a pages directory assume that we haven't
 	// setup the content yet and copy everything from default data
 	if _, err := os.Stat(*dirpages); os.IsNotExist(err) {
+		log.Println("Initializing default pages.")
 		check(copyfiles(*dirdefpages, *dirpages))
+		check(copyglob(filepath.Join(*dirplugins, "*", "pages", "*"), *dirpages))
 	}
 
 	render := renderer.New(filepath.Join(*dirviews, "*"))
@@ -145,4 +147,29 @@ func copyfiles(src, dst string) error {
 			}
 			return ioutil.WriteFile(filepath.Join(dst, path), data, info.Mode())
 		})
+}
+
+func copyglob(glob, dst string) error {
+	matches, err := filepath.Glob(glob)
+	if err != nil {
+		return err
+	}
+	for _, match := range matches {
+		if filepath.Ext(match) != "" {
+			continue
+		}
+
+		data, err := ioutil.ReadFile(match)
+		if err != nil {
+			continue
+		}
+
+		info, err := os.Stat(match)
+		if err != nil || info.IsDir() {
+			continue
+		}
+
+		_ = ioutil.WriteFile(filepath.Join(dst, filepath.Base(match)), data, info.Mode())
+	}
+	return nil
 }
