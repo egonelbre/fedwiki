@@ -13,8 +13,8 @@ import (
 	"github.com/egonelbre/fedwiki/pagestore"
 	"github.com/egonelbre/fedwiki/pagestore/folderstore"
 	"github.com/egonelbre/fedwiki/plugin"
-	"github.com/egonelbre/fedwiki/renderer"
 	"github.com/egonelbre/fedwiki/sitemap"
+	"github.com/egonelbre/fedwiki/template"
 )
 
 var (
@@ -74,7 +74,7 @@ func main() {
 		check(copyglob(filepath.Join(*dirplugins, "*", "pages", "*"), *dirpages))
 	}
 
-	render := renderer.New(filepath.Join(*dirviews, "*"))
+	render := template.New(filepath.Join(*dirviews, "*"))
 
 	mainstore := folderstore.New(*dirpages)
 	sitemap := sitemap.New(mainstore)

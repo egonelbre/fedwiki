@@ -1,4 +1,4 @@
-package renderer
+package template
 
 import (
 	"fmt"
@@ -10,15 +10,15 @@ import (
 	"github.com/egonelbre/fedwiki"
 )
 
-type Renderer struct {
+type Template struct {
 	Glob string
 }
 
-func New(glob string) *Renderer {
-	return &Renderer{glob}
+func New(glob string) *Template {
+	return &Template{glob}
 }
 
-func (r *Renderer) RenderHTML(w io.Writer, tname string, data interface{}) error {
+func (r *Template) RenderHTML(w io.Writer, tname string, data interface{}) error {
 	t, err := template.New("").Funcs(helpers).ParseGlob(r.Glob)
 	if err != nil {
 		return err

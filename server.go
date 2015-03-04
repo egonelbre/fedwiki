@@ -24,7 +24,7 @@ func ErrorResponse(ecode int, format string, args ...interface{}) (code int, tem
 	}
 }
 
-type Renderer interface {
+type Template interface {
 	RenderHTML(w io.Writer, template string, data interface{}) error
 }
 
@@ -40,7 +40,7 @@ func (fn HandlerFunc) Handle(r *http.Request) (code int, template string, data i
 // This implements basic management of request of headers and canonicalizes the requests
 type Server struct {
 	Handler  Handler
-	Renderer Renderer
+	Template Template
 }
 
 func (server *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -75,11 +75,11 @@ func (server *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	switch {
-	case responseType == "" && server.Renderer == nil:
+	case responseType == "" && server.Template == nil:
 		responseType = "application/json"
 	case responseType == "":
 		responseType = "text/html"
-	case responseType == "text/html" && server.Renderer == nil:
+	case responseType == "text/html" && server.Template == nil:
 		responseType = "application/json"
 	}
 
@@ -94,7 +94,7 @@ func (server *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	case "text/plain":
 		fmt.Fprintf(rw, "%#v\n", data)
 	case "text/html":
-		err := server.Renderer.RenderHTML(rw, template, data)
+		err := server.Template.RenderHTML(rw, template, data)
 		if err != nil {
 			fmt.Fprintf(rw, err.Error())
 		}

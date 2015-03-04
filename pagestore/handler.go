@@ -103,11 +103,5 @@ func readJSONAction(r io.Reader) (fedwiki.Action, error) {
 		return nil, err
 	}
 
-	if validator, ok := fedwiki.ActionSpecs[action.Type()]; ok {
-		if err := validator.Validate(action); err != nil {
-			return nil, err
-		}
-	}
-
 	return action, nil
 }
