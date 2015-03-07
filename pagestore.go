@@ -2,16 +2,25 @@ package fedwiki
 
 import (
 	"fmt"
-	"regexp"
 	"unicode"
 )
 
-var rxSlug = regexp.MustCompile(`^[\p{L}\p{N}\/_-]+$`)
-
 func ValidateSlug(slug Slug) error {
-	if !rxSlug.MatchString(string(slug)) {
-		return fmt.Errorf(`slug must match /%s/`, rxSlug)
+	if len(slug) == 0 {
+		return fmt.Errorf("slug cannot be empty")
 	}
+
+	for _, r := range slug {
+		switch {
+		case r == '/':
+		case r == '-':
+		case unicode.IsNumber(r):
+		case unicode.IsLetter(r):
+		default:
+			return fmt.Errorf(`slug must only contain letters, numbers, - or /`)
+		}
+	}
+
 	return nil
 }
 
