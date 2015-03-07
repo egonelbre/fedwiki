@@ -2,8 +2,6 @@ package item
 
 import "github.com/egonelbre/fedwiki"
 
-// just simple utility functions for creating items
-
 func Paragraph(text string) fedwiki.Item {
 	return fedwiki.Item{
 		"type": "paragraph",

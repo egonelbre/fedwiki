@@ -3,10 +3,10 @@ package fedwiki
 import (
 	"fmt"
 	"regexp"
-	"strings"
+	"unicode"
 )
 
-var rxSlug = regexp.MustCompile(`^[a-zA-Z0-9\.\/_-]+$`)
+var rxSlug = regexp.MustCompile(`^[\p{L}\p{N}\/_-]+$`)
 
 func ValidateSlug(slug Slug) error {
 	if !rxSlug.MatchString(string(slug)) {
@@ -15,25 +15,35 @@ func ValidateSlug(slug Slug) error {
 	return nil
 }
 
-var (
-	rxName     = regexp.MustCompile(`([A-Z][a-z]+)`)
-	rxNumber   = regexp.MustCompile(`([0-9]+)`)
-	rxToDash   = regexp.MustCompile(`[\-\s]+`)
-	rxSlashes  = regexp.MustCompile(`\s*(\/\s*)+`)
-	rxTrailing = regexp.MustCompile(`[\/ ]+$`)
-	rxRemove   = regexp.MustCompile(`[^a-zA-Z0-9\-\/_ ]`)
-)
-
 func Slugify(s string) Slug {
-	s = rxName.ReplaceAllString(s, " $1 ")
-	s = rxNumber.ReplaceAllString(s, " $1 ")
-	s = rxRemove.ReplaceAllString(s, "")
-	s = strings.TrimSpace(s)
-	s = rxSlashes.ReplaceAllString(s, "/")
-	s = rxTrailing.ReplaceAllString(s, "")
-	s = rxToDash.ReplaceAllString(s, "-")
-	s = strings.ToLower(s)
-	return Slug(s)
+	cutdash := true
+	emitdash := false
+
+	slug := make([]rune, 0, len(s))
+	for _, r := range s {
+		switch {
+		case unicode.IsNumber(r) || unicode.IsLetter(r):
+			if emitdash && !cutdash {
+				slug = append(slug, '-')
+			}
+			slug = append(slug, unicode.ToLower(r))
+
+			emitdash = false
+			cutdash = false
+		case r == '/':
+			slug = append(slug, r)
+			emitdash = false
+			cutdash = true
+		default:
+			emitdash = true
+		}
+	}
+
+	if len(slug) == 0 {
+		return Slug("-")
+	}
+
+	return Slug(slug)
 }
 
 type PageStore interface {
