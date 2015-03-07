@@ -28,3 +28,5 @@ cmd/fedwiki/data/**
 cmd/fedwiki/plugins/**
 
 **/temp/**
+
+*.sublime-workspace

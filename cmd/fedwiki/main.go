@@ -74,7 +74,7 @@ func main() {
 		check(copyglob(filepath.Join(*dirplugins, "*", "pages", "*"), *dirpages))
 	}
 
-	render := template.New(filepath.Join(*dirviews, "*"))
+	templates := template.New(filepath.Join(*dirviews, "*"))
 
 	mainstore := folderstore.New(*dirpages)
 	sitemap := sitemap.New(mainstore)
@@ -84,13 +84,21 @@ func main() {
 
 	plugins := plugin.NewServer(*dirplugins)
 	plugins.Update()
-	pluginsserver := &fedwiki.Server{plugins, render}
-
+	pluginsserver := &fedwiki.Server{
+		Handler:  plugins,
+		Template: templates,
+	}
 	http.Handle("/plugins/", plugins)
 
-	sitemapserver := &fedwiki.Server{sitemap, render}
+	sitemapserver := &fedwiki.Server{
+		Handler:  sitemap,
+		Template: templates,
+	}
 
-	pageserver := &fedwiki.Server{pagestore.Handler{mainstore}, render}
+	pageserver := &fedwiki.Server{
+		Handler:  pagestore.Handler{mainstore},
+		Template: templates,
+	}
 	http.Handle("/",
 		http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, "/system/sitemap") ||

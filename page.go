@@ -58,7 +58,7 @@ func (page *Page) LastModified() time.Time {
 
 func (s Story) IndexOf(id string) (index int, ok bool) {
 	for i, item := range s {
-		if item.Id() == id {
+		if item.ID() == id {
 			return i, true
 		}
 	}
@@ -89,7 +89,7 @@ func (s *Story) InsertAfter(after string, item Item) error {
 	return fmt.Errorf("missing item id \"%v\"", after)
 }
 
-func (s Story) SetById(id string, item Item) error {
+func (s Story) SetByID(id string, item Item) error {
 	if i, ok := s.IndexOf(id); ok {
 		s[i] = item
 		return nil
@@ -98,7 +98,7 @@ func (s Story) SetById(id string, item Item) error {
 }
 
 func (ps *Story) Move(id string, after string) error {
-	item, err := ps.RemoveById(id)
+	item, err := ps.RemoveByID(id)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (ps *Story) Move(id string, after string) error {
 	return nil
 }
 
-func (s *Story) RemoveById(id string) (item Item, err error) {
+func (s *Story) RemoveByID(id string) (item Item, err error) {
 	if i, ok := s.IndexOf(id); ok {
 		t := *s
 		item = t[i]
@@ -130,9 +130,11 @@ func (item Item) Val(key string) string {
 	return ""
 }
 
-func (item Item) Id() string { return item.Val("id") }
+func (item Item) ID() string { return item.Val("id") }
 
 type Date struct{ time.Time }
+
+func NewDate(t time.Time) Date { return Date{t} }
 
 func ParseDate(data string) (Date, error) {
 	v, err := strconv.Atoi(data)
@@ -141,8 +143,6 @@ func ParseDate(data string) (Date, error) {
 	}
 	return Date{time.Unix(int64(v), 0)}, nil
 }
-
-func Now() Date { return Date{time.Now()} }
 
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Itoa(int(d.Unix()))), nil

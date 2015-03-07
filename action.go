@@ -50,10 +50,10 @@ var actionfns = map[string]func(p *Page, a Action) error{
 		if !ok {
 			return fmt.Errorf("invalid item")
 		}
-		return p.Story.SetById(action.Str("id"), item)
+		return p.Story.SetByID(action.Str("id"), item)
 	},
 	"remove": func(p *Page, action Action) error {
-		_, err := p.Story.RemoveById(action.Str("id"))
+		_, err := p.Story.RemoveByID(action.Str("id"))
 		return err
 	},
 	"move": func(p *Page, action Action) error {
