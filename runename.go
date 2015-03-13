@@ -1,7 +1,7 @@
 // generated code
 package fedwiki
 
-var runename = map[rune]string {
+var runename = map[rune]string{
 	'\U00000021': "excl",
 	'\U00000022': "quot",
 	'\U00000023': "num",
