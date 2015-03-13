@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-type Slug string
-
 type PageHeader struct {
 	Slug     Slug   `json:"slug"`
 	Title    string `json:"title"`
