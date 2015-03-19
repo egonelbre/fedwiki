@@ -11,11 +11,16 @@ type PageHeader struct {
 	Title    string `json:"title"`
 	Date     Date   `json:"date"`
 	Synopsis string `json:"synopsis,omitempty"`
+
+	// may contain extra information specific to client/server
+	Meta Meta `json:"meta,omitempty"`
 }
+
+type Meta map[string]interface{}
 
 type Page struct {
 	PageHeader
-	Story   Story   `json:"story"`
+	Story   Story   `json:"story,omitempty"`
 	Journal Journal `json:"journal,omitempty"`
 }
 
