@@ -44,19 +44,18 @@ func (page *Page) Apply(action Action) error {
 	return nil
 }
 
-// if no date is found then it will use the current time!
 func (page *Page) LastModified() time.Time {
 	if !page.Date.IsZero() {
 		return page.Date.Time
 	}
 
-	for _, action := range page.Journal {
-		if t, err := action.Date(); err == nil && !t.IsZero() {
+	for i := len(page.Journal) - 1; i >= 0; i-- {
+		if t, err := page.Journal[i].Date(); err == nil && !t.IsZero() {
 			return t.Time
 		}
 	}
 
-	return time.Now()
+	return page.Date.Time
 }
 
 func (s Story) IndexOf(id string) (index int, ok bool) {
