@@ -1,4 +1,4 @@
-package pagestore
+package mongostore
 
 import (
 	"github.com/egonelbre/fedwiki"
@@ -42,6 +42,13 @@ func (store *Store) Exists(slug fedwiki.Slug) bool {
 
 	n, err := c.FindId(slug).Count()
 	return (n > 0) && (err != nil)
+}
+
+func (store *Store) Create(slug fedwiki.Slug, page *fedwiki.Page) error {
+	session, c := store.c()
+	defer session.Close()
+
+	return translate(c.Insert(page))
 }
 
 func (store *Store) Load(slug fedwiki.Slug) (*fedwiki.Page, error) {

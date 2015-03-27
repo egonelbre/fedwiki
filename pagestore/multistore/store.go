@@ -35,6 +35,16 @@ func (store *Store) Load(slug fedwiki.Slug) (*fedwiki.Page, error) {
 	return store.Fallback.Load(slug)
 }
 
+func (store *Store) Create(slug fedwiki.Slug, page *fedwiki.Page) error {
+	for _, store := range store.Order {
+		if store.Exists(slug) {
+			return store.Create(slug, page)
+		}
+	}
+
+	return store.Fallback.Create(slug)
+}
+
 func (store *Store) Save(slug fedwiki.Slug, page *fedwiki.Page) error {
 	for _, store := range store.Order {
 		if store.Exists(slug) {

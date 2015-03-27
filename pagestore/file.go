@@ -56,6 +56,16 @@ func LoadHeader(filename string, slug fedwiki.Slug) (*fedwiki.PageHeader, error)
 	return header, nil
 }
 
+func Create(page *fedwiki.Page, filename string) error {
+	data, err := json.Marshal(page)
+	if err != nil {
+		return err
+	}
+
+	//TODO: handle case when it exists
+	return ConvertOSError(ioutil.WriteFile(filename, data, 0755))
+}
+
 func Save(page *fedwiki.Page, filename string) error {
 	data, err := json.Marshal(page)
 	if err != nil {

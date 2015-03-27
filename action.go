@@ -16,6 +16,18 @@ func (action Action) Str(key string) string {
 
 func (action Action) Type() string { return action.Str("type") }
 
+func (action Action) Item() (Item, bool) {
+	item, ok := action["item"]
+	if !ok {
+		return nil, false
+	}
+	m, ismap := (item).(map[string]interface{})
+	if !ismap {
+		return nil, false
+	}
+	return (Item)(m), true
+}
+
 func (action Action) Date() (t Date, err error) {
 	val, ok := action["date"]
 	if !ok {
@@ -37,18 +49,22 @@ func (action Action) Date() (t Date, err error) {
 
 var actionfns = map[string]func(p *Page, a Action) error{
 	"add": func(p *Page, action Action) error {
-		props := action["item"]
-		item, ok := props.(Item)
+		item, ok := action.Item()
 		if !ok {
-			return fmt.Errorf("invalid item")
+			return fmt.Errorf("no item in action")
 		}
-		return p.Story.InsertAfter(action.Str("after"), item)
+
+		after := action.Str("after")
+		if after == "" {
+			p.Story.Append(item)
+			return nil
+		}
+		return p.Story.InsertAfter(after, item)
 	},
 	"edit": func(p *Page, action Action) error {
-		props := action["item"]
-		item, ok := props.(Item)
+		item, ok := action.Item()
 		if !ok {
-			return fmt.Errorf("invalid item")
+			return fmt.Errorf("no item in action")
 		}
 		return p.Story.SetByID(action.Str("id"), item)
 	},

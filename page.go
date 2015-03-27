@@ -7,7 +7,7 @@ import (
 )
 
 type PageHeader struct {
-	Slug     Slug   `json:"slug"`
+	Slug     Slug   `json:"slug" bson:"_id"`
 	Title    string `json:"title"`
 	Date     Date   `json:"date"`
 	Synopsis string `json:"synopsis,omitempty"`
@@ -19,9 +19,9 @@ type PageHeader struct {
 type Meta map[string]interface{}
 
 type Page struct {
-	PageHeader
-	Story   Story   `json:"story,omitempty"`
-	Journal Journal `json:"journal,omitempty"`
+	PageHeader `bson:",inline"`
+	Story      Story   `json:"story,omitempty"`
+	Journal    Journal `json:"journal,omitempty"`
 }
 
 type Story []Item
@@ -88,7 +88,7 @@ func (s *Story) InsertAfter(after string, item Item) error {
 		s.insertAt(i+1, item)
 		return nil
 	}
-	return fmt.Errorf("missing item id \"%v\"", after)
+	return fmt.Errorf("invalid item id '%v'", after)
 }
 
 func (s Story) SetByID(id string, item Item) error {
@@ -96,7 +96,7 @@ func (s Story) SetByID(id string, item Item) error {
 		s[i] = item
 		return nil
 	}
-	return fmt.Errorf("missing item id \"%v\"", id)
+	return fmt.Errorf("invalid item id '%v'", id)
 }
 
 func (ps *Story) Move(id string, after string) error {
@@ -120,7 +120,7 @@ func (s *Story) RemoveByID(id string) (item Item, err error) {
 		*s = t
 		return item, nil
 	}
-	return item, fmt.Errorf("missing item id \"%v\"", id)
+	return item, fmt.Errorf("missing item id '%v'", id)
 }
 
 type Item map[string]interface{}

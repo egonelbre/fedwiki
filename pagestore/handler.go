@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/egonelbre/fedwiki"
 )
@@ -46,7 +47,10 @@ func (pages Handler) Handle(r *http.Request) (code int, template string, data in
 			return fedwiki.ErrorResponse(http.StatusBadRequest, `Invalid request Content-Type "%s".`, r.Header.Get("Content-Type"))
 		}
 
-		err = pages.Save(slug, page)
+		page.Slug = slug
+		page.Date = fedwiki.NewDate(time.Now())
+
+		err = pages.Create(slug, page)
 		if err != nil {
 			return fedwiki.ErrorResponse(http.StatusInternalServerError, err.Error())
 		}
@@ -79,6 +83,11 @@ func (pages Handler) Handle(r *http.Request) (code int, template string, data in
 		if err := page.Apply(action); err != nil {
 			return fedwiki.ErrorResponse(http.StatusInternalServerError, err.Error())
 		}
+
+		if err := pages.Save(slug, page); err != nil {
+			return fedwiki.ErrorResponse(http.StatusInternalServerError, err.Error())
+		}
+
 		return http.StatusOK, "", page
 	default:
 		return fedwiki.ErrorResponse(http.StatusNotAcceptable, `Unknown request Method "%s".`, r.Method)

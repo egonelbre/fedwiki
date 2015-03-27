@@ -32,6 +32,10 @@ func (store *Store) Load(slug fedwiki.Slug) (*fedwiki.Page, error) {
 	return page, err
 }
 
+func (store *Store) Create(slug fedwiki.Slug, page *fedwiki.Page) error {
+	return pagestore.Create(page, store.path(slug))
+}
+
 func (store *Store) Save(slug fedwiki.Slug, page *fedwiki.Page) error {
 	return pagestore.Save(page, store.path(slug))
 }
