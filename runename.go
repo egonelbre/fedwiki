@@ -1,4 +1,3 @@
-// generated code
 package fedwiki
 
 // runename is a table to decide how symbols should be
