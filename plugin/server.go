@@ -1,3 +1,4 @@
+// This package implements federated wiki Plugin handling
 package plugin
 
 import (
@@ -15,24 +16,22 @@ import (
 	"github.com/egonelbre/fedwiki"
 )
 
+// Factory identifies a Item factory
 type Factory struct {
 	Name     string
 	Title    string
 	Category string
 }
 
+// Plugin contains information where a Factory is located
 type Plugin struct {
 	Name    string
 	Folder  string
 	Factory *Factory
 }
 
-// plugin Server implements interfaces
-//   fedwiki.Handler
-// 		/system/factories
-// 		/system/plugins
-//   http.Handler
-// 		/plugin/*
+// Server implements federated wiki plugin handling
+//   contained in `Dir`.
 type Server struct {
 	Dir string
 
@@ -73,6 +72,7 @@ func readPlugin(dirname string) (*Plugin, error) {
 	return plugin, nil
 }
 
+// Update scans the directory for new plugins
 func (server *Server) Update() {
 	list, err := ioutil.ReadDir(server.Dir)
 	if err != nil {
@@ -98,6 +98,9 @@ func (server *Server) Update() {
 	server.plugins = plugins
 }
 
+// Handle handles federated wiki requests
+// /system/plugins
+// /system/factories
 func (server *Server) Handle(r *http.Request) (code int, template string, data interface{}) {
 	switch r.URL.Path {
 	case "/system/plugins":
@@ -129,6 +132,7 @@ func (server *Server) Handle(r *http.Request) (code int, template string, data i
 	return fedwiki.ErrorResponse(http.StatusNotFound, "Page not found.")
 }
 
+// ServeHTTP serves additional plugin data
 func (server *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	tokens := strings.SplitN(r.URL.Path, "/", 4)
 	if len(tokens) < 4 {

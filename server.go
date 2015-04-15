@@ -10,12 +10,14 @@ import (
 	"strings"
 )
 
+// errorInfo contains relevant information about an error
 type errorInfo struct {
 	Status string
 	Code   int
 	Detail string
 }
 
+// ErrorResponse creates a response based on http Error code
 func ErrorResponse(ecode int, format string, args ...interface{}) (code int, template string, data interface{}) {
 	return ecode, "error", errorInfo{
 		Status: http.StatusText(ecode),
@@ -24,13 +26,19 @@ func ErrorResponse(ecode int, format string, args ...interface{}) (code int, tem
 	}
 }
 
+// Template is the interface that is used to render pages as HTML
 type Template interface {
+	// RenderHTML renders data as HTML with the appropriate template
+	// template = "" means that it should be rendered as a regular page
 	RenderHTML(w io.Writer, template string, data interface{}) error
 }
 
+// Handler is the interface for handling federated wiki requests
 type Handler interface {
 	Handle(r *http.Request) (code int, template string, data interface{})
 }
+
+// HandlerFunc type adapts a function to be used as a regular handler
 type HandlerFunc func(r *http.Request) (code int, template string, data interface{})
 
 func (fn HandlerFunc) Handle(r *http.Request) (code int, template string, data interface{}) {
@@ -105,6 +113,7 @@ func (server *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 type acceptHeaders []string
 
+// Accepts checks whether mimetype is allowed
 func (spec acceptHeaders) Accepts(mimetype string) bool {
 	for _, mtype := range spec {
 		if mtype == mimetype {
@@ -114,6 +123,7 @@ func (spec acceptHeaders) Accepts(mimetype string) bool {
 	return false
 }
 
+// parseAccept parses request Accept header
 func parseAccept(r *http.Request) acceptHeaders {
 	var spec acceptHeaders
 

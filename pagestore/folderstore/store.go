@@ -1,3 +1,4 @@
+// This package implements PageStore for a folder
 package folderstore
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/egonelbre/fedwiki/pagestore"
 )
 
+// Store load/saves pages from a directory
 type Store struct {
 	Dir string
 }

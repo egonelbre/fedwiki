@@ -1,3 +1,4 @@
+// pagestore contains default handler for a fedwiki.PageStore
 package pagestore
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/egonelbre/fedwiki"
 )
 
+// Handler wraps a federated wiki PageStore and implements request handling and errors
 type Handler struct {
 	fedwiki.PageStore
 }

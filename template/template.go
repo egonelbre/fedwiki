@@ -1,3 +1,4 @@
+// This package implements simple HTML rendering for federated wiki
 package template
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/egonelbre/fedwiki"
 )
 
+// Template implements a glob based fedwiki.Template
 type Template struct {
 	Glob string
 }
@@ -36,6 +38,7 @@ var (
 	rxExternal = regexp.MustCompile(`\[((?:http|https|ftp):.*?) (.*?)\]`)
 )
 
+// replaceLinks replaces fedwiki style links with regular HTML links
 func replaceLinks(s string) template.HTML {
 	s = rxInternal.ReplaceAllStringFunc(s, func(s string) string {
 		s = strings.Trim(s, "[]")

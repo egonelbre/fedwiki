@@ -8,6 +8,7 @@ import (
 // Slug is a string where Slugify(string(slug)) == slug
 type Slug string
 
+// ValidateSlug verifies whether a `slug` is valid
 func ValidateSlug(slug Slug) error {
 	if len(slug) == 0 {
 		return fmt.Errorf("slug cannot be empty")

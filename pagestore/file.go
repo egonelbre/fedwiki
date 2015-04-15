@@ -8,6 +8,7 @@ import (
 	"github.com/egonelbre/fedwiki"
 )
 
+// Load loads page from `filename` and adds `slug` to it
 func Load(filename string, slug fedwiki.Slug) (*fedwiki.Page, error) {
 	data, err := ioutil.ReadFile(filename)
 	err = ConvertOSError(err)
@@ -33,6 +34,7 @@ func Load(filename string, slug fedwiki.Slug) (*fedwiki.Page, error) {
 	return page, nil
 }
 
+// LoadHeader loads header from `filename` and adds `slug` to it
 func LoadHeader(filename string, slug fedwiki.Slug) (*fedwiki.PageHeader, error) {
 	data, err := ioutil.ReadFile(filename)
 	err = ConvertOSError(err)
@@ -56,6 +58,7 @@ func LoadHeader(filename string, slug fedwiki.Slug) (*fedwiki.PageHeader, error)
 	return header, nil
 }
 
+// Create creates a new federated wiki page on disk with `filename`
 func Create(page *fedwiki.Page, filename string) error {
 	data, err := json.Marshal(page)
 	if err != nil {
@@ -66,6 +69,7 @@ func Create(page *fedwiki.Page, filename string) error {
 	return ConvertOSError(ioutil.WriteFile(filename, data, 0755))
 }
 
+// Save updates the page on disk
 func Save(page *fedwiki.Page, filename string) error {
 	data, err := json.Marshal(page)
 	if err != nil {

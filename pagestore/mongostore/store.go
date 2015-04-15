@@ -1,3 +1,4 @@
+// This package implements PageStore for MongoDB
 package mongostore
 
 import (
@@ -8,6 +9,7 @@ import (
 
 var _ fedwiki.PageStore = (*Store)(nil)
 
+// Store implements a fedwiki.PageStore for MongoDB
 type Store struct {
 	session    *mgo.Session
 	collection string

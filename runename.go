@@ -1,6 +1,8 @@
 // generated code
 package fedwiki
 
+// runename is a table to decide how symbols should be
+// encoded in Slug
 var runename = map[rune]string{
 	'\U00000021': "excl",
 	'\U00000022': "quot",

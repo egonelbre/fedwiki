@@ -1,3 +1,4 @@
+// This package implements dispatching PageStore
 package multistore
 
 import "github.com/egonelbre/fedwiki"

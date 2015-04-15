@@ -1,3 +1,4 @@
+// This package implements PageStore over a glob
 package globstore
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/egonelbre/pagestore"
 )
 
+// Store load/saves Pages based on a glob
 type Store struct {
 	Glob string
 }

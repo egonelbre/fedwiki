@@ -1,3 +1,4 @@
+// This package implements common federated wiki types
 package item
 
 import "github.com/egonelbre/fedwiki"

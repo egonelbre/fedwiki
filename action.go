@@ -5,8 +5,11 @@ import (
 	"time"
 )
 
+// Action represents a operation that can be applied to a fedwiki.Page
 type Action map[string]interface{}
 
+// Str returns string value by the key
+// if that key doesn't exist, it will return an empty string
 func (action Action) Str(key string) string {
 	if s, ok := action[key].(string); ok {
 		return s
@@ -14,8 +17,12 @@ func (action Action) Str(key string) string {
 	return ""
 }
 
-func (action Action) Type() string { return action.Str("type") }
+// Type returns the action type attribute
+func (action Action) Type() string {
+	return action.Str("type")
+}
 
+// Item returns the item attribute
 func (action Action) Item() (Item, bool) {
 	item, ok := action["item"]
 	if !ok {
@@ -28,6 +35,7 @@ func (action Action) Item() (Item, bool) {
 	return (Item)(m), true
 }
 
+// Date returns the time when the action occurred
 func (action Action) Date() (t Date, err error) {
 	val, ok := action["date"]
 	if !ok {
@@ -47,6 +55,7 @@ func (action Action) Date() (t Date, err error) {
 	return Date{time.Unix(0, 0)}, fmt.Errorf("unknown date format")
 }
 
+// actionfns defines how each action type is applied
 var actionfns = map[string]func(p *Page, a Action) error{
 	"add": func(p *Page, action Action) error {
 		item, ok := action.Item()

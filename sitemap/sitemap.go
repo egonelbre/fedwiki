@@ -1,3 +1,4 @@
+// This package implements sitemap and slugs Handler for a PageStore
 package sitemap
 
 import (
@@ -7,7 +8,9 @@ import (
 	"github.com/egonelbre/fedwiki"
 )
 
-// provides the /system pages
+// Handler implements a page handler for
+// /system/sitemap
+// /system/slugs
 type Handler struct {
 	Store fedwiki.PageStore
 
