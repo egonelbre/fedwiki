@@ -103,7 +103,7 @@ func (s *Story) InsertAfter(id string, item Item) error {
 		s.insertAt(i+1, item)
 		return nil
 	}
-	return fmt.Errorf("invalid item id '%v'", after)
+	return fmt.Errorf("invalid item id '%v'", id)
 }
 
 // SetByID replaces item with `id` with `item`
