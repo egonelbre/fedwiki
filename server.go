@@ -91,6 +91,13 @@ func (server *Server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		responseType = "application/json"
 	}
 
+	// Redirect if it isn't a valid slug
+	slug := Slugify(r.URL.Path)
+	if string(slug) != r.URL.Path {
+		http.Redirect(rw, r, string(slug), http.StatusSeeOther)
+		return
+	}
+
 	code, template, data := server.Handler.Handle(r)
 
 	rw.Header().Set("Content-Type", responseType)
